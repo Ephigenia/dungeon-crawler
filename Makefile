@@ -1,7 +1,4 @@
-.PHONY: init install run build
-
-init:
-	go mod init github.com/ephigenia/ebit-engine-game-1
+.PHONY: install run build
 
 install:
 	go mod download
