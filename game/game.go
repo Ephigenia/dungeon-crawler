@@ -32,7 +32,6 @@ var (
 	colorFloor  = color.RGBA{60, 64, 72, 255}
 	colorPlayer = color.RGBA{152, 195, 121, 255}
 	colorEnemy  = color.RGBA{224, 108, 117, 255}
-	colorPotion = color.RGBA{229, 192, 123, 255}
 )
 
 // Game implements ebiten.Game.
@@ -56,7 +55,6 @@ type Game struct {
 	floorTileImg *ebiten.Image
 	playerImg    *ebiten.Image
 	enemyImg     *ebiten.Image
-	potionImg    *ebiten.Image
 }
 
 // New creates a new game with a generated dungeon.
@@ -92,8 +90,6 @@ func New(assets fs.FS) *Game {
 	g.playerImg.Fill(colorPlayer)
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.enemyImg.Fill(colorEnemy)
-	g.potionImg = ebiten.NewImage(8, 8)
-	g.potionImg.Fill(colorPotion)
 
 	g.resetEntities(d)
 	return g
@@ -335,11 +331,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		if p.Taken {
 			continue
 		}
-		px := float64(p.X*TileSize) + offsetX + float64(TileSize-potionSize)/2
-		py := float64(p.Y*TileSize) + offsetY + float64(TileSize-potionSize)/2
-		op.GeoM.Reset()
-		op.GeoM.Translate(px, py)
-		screen.DrawImage(g.potionImg, &op)
+		px := float32(float64(p.X*TileSize) + offsetX + float64(TileSize-potionSize)/2)
+		py := float32(float64(p.Y*TileSize) + offsetY + float64(TileSize-potionSize)/2)
+		vector.DrawFilledRect(screen, px, py, potionSize, potionSize, p.Item.Color, false)
 	}
 
 	// Draw living enemies with HP bar
@@ -428,8 +422,7 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 
 			// Item fill
 			if idx < len(inv.Items) {
-				ic := itemCategoryColor(inv.Items[idx].Category)
-				vector.DrawFilledRect(screen, sx+2, sy+2, slotSize-4, slotSize-4, ic, false)
+				vector.DrawFilledRect(screen, sx+2, sy+2, slotSize-4, slotSize-4, inv.Items[idx].Color, false)
 			}
 
 			// Border
@@ -470,18 +463,6 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	text.Draw(screen, "[Arrows/WASD] Navigate   [U] Use   [I] Close", g.hudFont, panelX+10, panelY+panelH-14, color.RGBA{120, 120, 120, 255})
 }
 
-func itemCategoryColor(cat ItemCategory) color.RGBA {
-	switch cat {
-	case CategoryConsumable:
-		return color.RGBA{229, 192, 123, 255}
-	case CategoryEquipment:
-		return color.RGBA{97, 175, 239, 255}
-	case CategoryKeyItem:
-		return color.RGBA{198, 120, 221, 255}
-	default:
-		return color.RGBA{150, 150, 150, 255}
-	}
-}
 
 // Layout returns the logical screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
