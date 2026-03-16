@@ -72,9 +72,9 @@ func New(assets fs.FS) *Game {
 		log.Fatalf("parse font: %v", err)
 	}
 	g.hudFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    16,
+		Size:    12,
 		DPI:     72,
-		Hinting: font.HintingFull,
+		Hinting: font.HintingNone,
 	})
 	if err != nil {
 		log.Fatalf("new font face: %v", err)
@@ -302,7 +302,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// HUD: player health
-	text.Draw(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 4, 20, color.White)
+	text.Draw(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 4, 14, color.White)
 
 	// Draw player
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
