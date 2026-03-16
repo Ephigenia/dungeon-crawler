@@ -11,6 +11,7 @@ type Player struct {
 	EXP          int
 	NextLevelEXP int
 	Inventory    *Inventory
+	Equipment    *Equipment
 }
 
 func newPlayer(x, y int) *Player {
@@ -25,7 +26,68 @@ func newPlayer(x, y int) *Player {
 		EXP:          0,
 		NextLevelEXP: 100,
 		Inventory:    newInventory(),
+		Equipment:    newEquipment(),
 	}
+}
+
+// applyStatMods adds or subtracts stat modifiers (sign = +1 or -1).
+func (p *Player) applyStatMods(mods StatModifiers, sign int) {
+	p.Attack += sign * mods.Attack
+	p.Defense += sign * mods.Defense
+	p.MaxHP += sign * mods.HP
+	if p.HP > p.MaxHP {
+		p.HP = p.MaxHP
+	}
+	p.Inventory.MaxItems += sign * mods.InvSlots
+	p.Inventory.MaxWeight += float64(sign) * mods.InvWeight
+}
+
+// Equip moves the item at invIdx from inventory into its designated equipment slot.
+// If the slot is already occupied the old item is swapped back to inventory.
+func (p *Player) Equip(invIdx int) bool {
+	inv := p.Inventory
+	if invIdx >= len(inv.Items) {
+		return false
+	}
+	item := inv.Items[invIdx]
+	if item.Slot == "" {
+		return false
+	}
+	old := p.Equipment.Slots[item.Slot]
+	if old != nil {
+		// After removing the new item, check if old item fits weight-wise.
+		weightAfter := inv.CurrentWeight() - item.Weight + old.Weight
+		if weightAfter > inv.MaxWeight {
+			return false
+		}
+	}
+	inv.Remove(invIdx)
+	if old != nil {
+		inv.Items = append(inv.Items, old)
+		p.applyStatMods(old.StatMods, -1)
+	}
+	p.Equipment.Slots[item.Slot] = item
+	p.applyStatMods(item.StatMods, 1)
+	return true
+}
+
+// Unequip moves the item in the given slot back to inventory.
+func (p *Player) Unequip(slot EquipmentSlot) bool {
+	item := p.Equipment.Slots[slot]
+	if item == nil {
+		return false
+	}
+	inv := p.Inventory
+	// After removing capacity bonuses, verify the inventory stays valid.
+	newMaxItems := inv.MaxItems - item.StatMods.InvSlots
+	newMaxWeight := inv.MaxWeight - item.StatMods.InvWeight
+	if len(inv.Items)+1 > newMaxItems || inv.CurrentWeight()+item.Weight > newMaxWeight {
+		return false
+	}
+	inv.Add(item)
+	p.applyStatMods(item.StatMods, -1)
+	p.Equipment.Slots[slot] = nil
+	return true
 }
 
 // levelUp increases the player's level and improves stats.

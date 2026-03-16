@@ -45,8 +45,10 @@ type Game struct {
 
 	potions []*Potion
 
-	inventoryOpen   bool
-	inventoryCursor int
+	inventoryOpen    bool
+	inventoryFocus   bool // true = item grid, false = equipment slots
+	inventoryCursor  int
+	equipmentCursor  int
 
 	hudFont font.Face
 
@@ -169,6 +171,8 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
 		g.inventoryOpen = !g.inventoryOpen
 		g.inventoryCursor = 0
+		g.equipmentCursor = 0
+		g.inventoryFocus = true
 		return nil
 	}
 
@@ -248,6 +252,20 @@ const inventoryCols = 5
 
 // updateInventory handles input while the inventory screen is open.
 func (g *Game) updateInventory() {
+	// Tab switches focus between item grid and equipment slots.
+	if inpututil.IsKeyJustPressed(ebiten.KeyTab) {
+		g.inventoryFocus = !g.inventoryFocus
+		return
+	}
+
+	if g.inventoryFocus {
+		g.updateInventoryItems()
+	} else {
+		g.updateInventoryEquipment()
+	}
+}
+
+func (g *Game) updateInventoryItems() {
 	inv := g.player.Inventory
 	maxSlots := inv.MaxItems
 
@@ -272,11 +290,19 @@ func (g *Game) updateInventory() {
 		}
 	}
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyU) && g.inventoryCursor < len(inv.Items) {
+	usePressed := inpututil.IsKeyJustPressed(ebiten.KeyU) || inpututil.IsKeyJustPressed(ebiten.KeyEnter)
+	if usePressed && g.inventoryCursor < len(inv.Items) {
 		item := inv.Items[g.inventoryCursor]
-		if item.Category == CategoryConsumable && item.OnUse != nil {
-			if item.OnUse(g.player) {
+		switch item.Category {
+		case CategoryConsumable:
+			if item.OnUse != nil && item.OnUse(g.player) {
 				inv.Remove(g.inventoryCursor)
+				if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
+					g.inventoryCursor--
+				}
+			}
+		case CategoryEquipment:
+			if g.player.Equip(g.inventoryCursor) {
 				if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 					g.inventoryCursor--
 				}
@@ -289,6 +315,27 @@ func (g *Game) updateInventory() {
 		if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 			g.inventoryCursor--
 		}
+	}
+}
+
+func (g *Game) updateInventoryEquipment() {
+	numSlots := len(EquipmentSlotOrder)
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		if g.equipmentCursor < numSlots-1 {
+			g.equipmentCursor++
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) || inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		if g.equipmentCursor > 0 {
+			g.equipmentCursor--
+		}
+	}
+
+	usePressed := inpututil.IsKeyJustPressed(ebiten.KeyU) || inpututil.IsKeyJustPressed(ebiten.KeyEnter)
+	if usePressed {
+		slot := EquipmentSlotOrder[g.equipmentCursor]
+		g.player.Unequip(slot)
 	}
 }
 
@@ -380,35 +427,60 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 }
 
-// drawInventory renders the inventory overlay.
+// drawInventory renders the inventory overlay with item grid and equipment slots.
 func (g *Game) drawInventory(screen *ebiten.Image) {
 	const (
-		panelX      = 30
-		panelY      = 30
-		panelW      = 580
-		panelH      = 380
-		slotSize    = 16
-		slotGap     = 4
-		slotStride  = slotSize + slotGap
-		gridX       = panelX + 20
-		gridY       = panelY + 50
-		detailX     = gridX + inventoryCols*slotStride + 30
+		panelX     = 20
+		panelY     = 20
+		panelW     = 600
+		panelH     = 440
+		slotSize   = 16
+		slotGap    = 4
+		slotStride = slotSize + slotGap
+		gridX      = panelX + 14
+		gridY      = panelY + 54
+		dividerX   = 310
+		equipX     = dividerX + 12
+		equipY     = panelY + 54
+		equipRowH  = 18
+		detailY    = panelY + 310
 	)
 
-	// Dark overlay + panel background
+	border := color.RGBA{100, 110, 140, 255}
+	bg := color.RGBA{28, 32, 42, 255}
+	dim := color.RGBA{160, 160, 160, 255}
+	green := color.RGBA{152, 210, 152, 255}
+	yellow := color.RGBA{220, 210, 100, 255}
+	red := color.RGBA{200, 80, 80, 255}
+
+	// Overlay + panel
 	vector.DrawFilledRect(screen, 0, 0, ScreenW, ScreenH, color.RGBA{0, 0, 0, 180}, false)
-	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, color.RGBA{28, 32, 42, 255}, false)
-	vector.DrawFilledRect(screen, panelX, panelY, panelW, 1, color.RGBA{100, 110, 140, 255}, false)
-	vector.DrawFilledRect(screen, panelX, panelY+panelH, panelW, 1, color.RGBA{100, 110, 140, 255}, false)
-	vector.DrawFilledRect(screen, panelX, panelY, 1, panelH, color.RGBA{100, 110, 140, 255}, false)
-	vector.DrawFilledRect(screen, panelX+panelW, panelY, 1, panelH, color.RGBA{100, 110, 140, 255}, false)
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, bg, false)
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, 1, border, false)
+	vector.DrawFilledRect(screen, panelX, panelY+panelH, panelW, 1, border, false)
+	vector.DrawFilledRect(screen, panelX, panelY, 1, panelH, border, false)
+	vector.DrawFilledRect(screen, panelX+panelW, panelY, 1, panelH, border, false)
 
-	text.Draw(screen, "INVENTORY", g.hudFont, panelX+10, panelY+18, color.White)
+	// Vertical divider
+	vector.DrawFilledRect(screen, dividerX, panelY+40, 1, panelH-40, border, false)
+	// Horizontal divider above detail area
+	vector.DrawFilledRect(screen, panelX, detailY-8, panelW, 1, border, false)
+
+	// --- Section headers ---
+	white := color.RGBA{255, 255, 255, 255}
+	itemsFocusColor := dim
+	equipFocusColor := dim
+	if g.inventoryFocus {
+		itemsFocusColor = white
+	} else {
+		equipFocusColor = white
+	}
 	inv := g.player.Inventory
-	infoStr := fmt.Sprintf("%d / %d items   %.2f / %.2f kg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight)
-	text.Draw(screen, infoStr, g.hudFont, panelX+10, panelY+34, color.RGBA{160, 160, 160, 255})
+	text.Draw(screen, fmt.Sprintf("ITEMS  %d/%d  %.1f/%.1fkg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight),
+		g.hudFont, gridX, panelY+18, itemsFocusColor)
+	text.Draw(screen, "EQUIPMENT", g.hudFont, equipX, panelY+18, equipFocusColor)
 
-	// Slot grid
+	// --- Item grid ---
 	maxSlots := inv.MaxItems
 	rows := (maxSlots + inventoryCols - 1) / inventoryCols
 	for row := 0; row < rows; row++ {
@@ -420,19 +492,15 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 			sx := float32(gridX + col*slotStride)
 			sy := float32(gridY + row*slotStride)
 
-			selected := idx == g.inventoryCursor
+			selected := g.inventoryFocus && idx == g.inventoryCursor
 			bgCol := color.RGBA{45, 50, 62, 255}
 			if selected {
 				bgCol = color.RGBA{70, 90, 115, 255}
 			}
 			vector.DrawFilledRect(screen, sx, sy, slotSize, slotSize, bgCol, false)
-
-			// Item fill
 			if idx < len(inv.Items) {
 				vector.DrawFilledRect(screen, sx+2, sy+2, slotSize-4, slotSize-4, inv.Items[idx].Color, false)
 			}
-
-			// Border
 			borderCol := color.RGBA{80, 88, 108, 255}
 			if selected {
 				borderCol = color.RGBA{180, 200, 255, 255}
@@ -444,32 +512,101 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 		}
 	}
 
-	// Item detail panel
-	dy := gridY + 12
-	if g.inventoryCursor < len(inv.Items) {
-		item := inv.Items[g.inventoryCursor]
-		text.Draw(screen, item.ID, g.hudFont, detailX, dy, color.White)
-		dy += 20
-		text.Draw(screen, fmt.Sprintf("Type:   %s", item.Category), g.hudFont, detailX, dy, color.RGBA{160, 160, 160, 255})
-		dy += 16
-		text.Draw(screen, fmt.Sprintf("Weight: %.1f kg", item.Weight), g.hudFont, detailX, dy, color.RGBA{160, 160, 160, 255})
-		dy += 16
-		if item.Effect != "" {
-			text.Draw(screen, fmt.Sprintf("Effect: %s", item.Effect), g.hudFont, detailX, dy, color.RGBA{152, 210, 152, 255})
-			dy += 16
+	// --- Equipment slot list ---
+	// columns: label | swatch | name | weight | effect
+	const (
+		colSwatch  = equipX + 58
+		colName    = equipX + 66
+		colWeight  = equipX + 178
+		colEffect  = equipX + 222
+	)
+	for i, slot := range EquipmentSlotOrder {
+		ey := equipY + i*equipRowH
+		selected := !g.inventoryFocus && i == g.equipmentCursor
+		if selected {
+			vector.DrawFilledRect(screen, equipX-2, float32(ey-11), panelW-float32(equipX-panelX)-4, equipRowH, color.RGBA{60, 70, 90, 255}, false)
 		}
-		if item.Category == CategoryConsumable {
-			dy += 4
-			text.Draw(screen, "[U] Use", g.hudFont, detailX, dy, color.RGBA{220, 210, 100, 255})
-			dy += 16
+		labelCol := dim
+		if selected {
+			labelCol = white
 		}
-		text.Draw(screen, "[X] Destroy", g.hudFont, detailX, dy, color.RGBA{200, 80, 80, 255})
+		text.Draw(screen, slotLabel(slot), g.hudFont, equipX, ey, labelCol)
+
+		equipped := g.player.Equipment.Slots[slot]
+		if equipped != nil {
+			vector.DrawFilledRect(screen, float32(colSwatch), float32(ey-8), 6, 6, equipped.Color, false)
+			text.Draw(screen, equipped.ID, g.hudFont, colName, ey, equipped.Color)
+			text.Draw(screen, fmt.Sprintf("%.1fkg", equipped.Weight), g.hudFont, colWeight, ey, dim)
+			if equipped.Effect != "" {
+				text.Draw(screen, equipped.Effect, g.hudFont, colEffect, ey, green)
+			}
+		} else {
+			text.Draw(screen, "(empty)", g.hudFont, colName, ey, color.RGBA{70, 70, 70, 255})
+		}
+	}
+
+	// --- Detail area (shared) ---
+	var selectedItem *Item
+	var fromEquipment bool
+	if g.inventoryFocus {
+		if g.inventoryCursor < len(inv.Items) {
+			selectedItem = inv.Items[g.inventoryCursor]
+		}
 	} else {
-		text.Draw(screen, "Empty slot", g.hudFont, detailX, dy, color.RGBA{80, 80, 80, 255})
+		slot := EquipmentSlotOrder[g.equipmentCursor]
+		selectedItem = g.player.Equipment.Slots[slot]
+		fromEquipment = true
+	}
+
+	dy := detailY + 10
+	if selectedItem != nil {
+		text.Draw(screen, selectedItem.ID, g.hudFont, gridX, dy, white)
+		dy += 16
+		text.Draw(screen, fmt.Sprintf("Type: %s   Weight: %.1f kg", selectedItem.Category, selectedItem.Weight), g.hudFont, gridX, dy, dim)
+		dy += 14
+		if selectedItem.Effect != "" {
+			text.Draw(screen, fmt.Sprintf("Effect: %s", selectedItem.Effect), g.hudFont, gridX, dy, green)
+			dy += 14
+		}
+		if selectedItem.StatMods != (StatModifiers{}) {
+			mods := selectedItem.StatMods
+			modsStr := ""
+			if mods.Attack != 0 {
+				modsStr += fmt.Sprintf("ATK %+d  ", mods.Attack)
+			}
+			if mods.Defense != 0 {
+				modsStr += fmt.Sprintf("DEF %+d  ", mods.Defense)
+			}
+			if mods.HP != 0 {
+				modsStr += fmt.Sprintf("HP %+d", mods.HP)
+			}
+			text.Draw(screen, modsStr, g.hudFont, gridX, dy, green)
+			dy += 14
+		}
+		dy += 4
+		if fromEquipment {
+			text.Draw(screen, "[U/Enter] Unequip", g.hudFont, gridX, dy, yellow)
+		} else {
+			switch selectedItem.Category {
+			case CategoryConsumable:
+				text.Draw(screen, "[U/Enter] Use    [X] Destroy", g.hudFont, gridX, dy, yellow)
+			case CategoryEquipment:
+				text.Draw(screen, "[U/Enter] Equip  [X] Destroy", g.hudFont, gridX, dy, yellow)
+			default:
+				text.Draw(screen, "[X] Destroy", g.hudFont, gridX, dy, red)
+			}
+		}
+	} else {
+		if fromEquipment {
+			text.Draw(screen, "(slot empty)", g.hudFont, gridX, dy, color.RGBA{70, 70, 70, 255})
+		} else {
+			text.Draw(screen, "(empty slot)", g.hudFont, gridX, dy, color.RGBA{70, 70, 70, 255})
+		}
 	}
 
 	// Controls hint
-	text.Draw(screen, "[Arrows/WASD] Navigate   [U] Use   [X] Destroy   [I] Close", g.hudFont, panelX+10, panelY+panelH-14, color.RGBA{120, 120, 120, 255})
+	text.Draw(screen, "[Tab] Switch   [Arrows/WASD] Navigate   [U/Enter] Action   [X] Destroy   [I] Close",
+		g.hudFont, panelX+6, panelY+panelH-10, color.RGBA{100, 100, 100, 255})
 }
 
 
