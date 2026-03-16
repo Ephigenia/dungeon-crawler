@@ -12,7 +12,8 @@ import (
 var assets embed.FS
 
 func main() {
-	ebiten.SetWindowSize(game.ScreenW, game.ScreenH)
+	scale := 2
+	ebiten.SetWindowSize(game.ScreenW*scale, game.ScreenH*scale)
 	ebiten.SetWindowTitle("Dungeon Crawler")
 	ebiten.SetWindowResizingMode(ebiten.WindowResizingModeEnabled)
 	g := game.New(assets)
