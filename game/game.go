@@ -239,7 +239,7 @@ func (g *Game) Update() error {
 			g.cameraX = float64(g.player.X * TileSize)
 			g.cameraY = float64(g.player.Y * TileSize)
 			if p := g.potionAt(nx, ny); p != nil {
-				if g.player.Inventory.Add(ItemHealthPotion) {
+				if g.player.Inventory.Add(p.Item) {
 					p.Taken = true
 				}
 			}

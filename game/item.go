@@ -1,5 +1,7 @@
 package game
 
+import "fmt"
+
 // ItemCategory classifies an item's general purpose.
 type ItemCategory string
 
@@ -19,22 +21,32 @@ type Item struct {
 	OnUse    func(p *Player) bool // returns true if the item is consumed on use
 }
 
-// Predefined item definitions.
-var (
-	ItemHealthPotion = &Item{
-		ID:       "health_potion",
-		Weight:   0.5,
+func newHealPotion(id string, weight float64, heal int) *Item {
+	effect := fmt.Sprintf("Restores %d HP", heal)
+	return &Item{
+		ID:       id,
+		Weight:   weight,
 		Category: CategoryConsumable,
-		Effect:   "Restores 10 HP",
+		Effect:   effect,
 		OnUse: func(p *Player) bool {
 			if p.HP >= p.MaxHP {
 				return false
 			}
-			p.HP += 10
+			p.HP += heal
 			if p.HP > p.MaxHP {
 				p.HP = p.MaxHP
 			}
 			return true
 		},
 	}
+}
+
+// Predefined item definitions.
+var (
+	ItemSmallHealthPotion  = newHealPotion("small_health_potion", 0.3, 5)
+	ItemMediumHealthPotion = newHealPotion("medium_health_potion", 0.5, 10)
+	ItemLargeHealthPotion  = newHealPotion("large_health_potion", 0.8, 20)
+
+	// HealthPotions is the pool used for random potion spawning.
+	HealthPotions = []*Item{ItemSmallHealthPotion, ItemMediumHealthPotion, ItemLargeHealthPotion}
 )
