@@ -46,6 +46,9 @@ type Game struct {
 
 	potions []*Potion
 
+	inventoryOpen   bool
+	inventoryCursor int
+
 	hudFont font.Face
 
 	// Cached images (created once, reused every frame to avoid allocation and GPU upload)
@@ -104,7 +107,11 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 	} else {
 		startX, startY = d.Width/2, d.Height/2
 	}
-	g.player = newPlayer(startX, startY)
+	if g.player == nil {
+		g.player = newPlayer(startX, startY)
+	} else {
+		g.player.X, g.player.Y = startX, startY
+	}
 	g.cameraX = float64(startX * TileSize)
 	g.cameraY = float64(startY * TileSize)
 
@@ -163,6 +170,17 @@ func (g *Game) Update() error {
 		return ebiten.Termination
 	}
 
+	if inpututil.IsKeyJustPressed(ebiten.KeyI) {
+		g.inventoryOpen = !g.inventoryOpen
+		g.inventoryCursor = 0
+		return nil
+	}
+
+	if g.inventoryOpen {
+		g.updateInventory()
+		return nil
+	}
+
 	up := ebiten.IsKeyPressed(ebiten.KeyArrowUp) || ebiten.IsKeyPressed(ebiten.KeyW)
 	down := ebiten.IsKeyPressed(ebiten.KeyArrowDown) || ebiten.IsKeyPressed(ebiten.KeyS)
 	left := ebiten.IsKeyPressed(ebiten.KeyArrowLeft) || ebiten.IsKeyPressed(ebiten.KeyA)
@@ -210,23 +228,65 @@ func (g *Game) Update() error {
 		if e := g.enemyAt(nx, ny); e != nil {
 			// Bump attack: player hits enemy, enemy retaliates
 			e.TakeDamage(g.player.Attack)
+			g.player.AddEXP(5)
 			if e.IsAlive() {
 				g.player.TakeDamage(e.Attack)
+			} else {
+				g.player.AddEXP(20)
 			}
 		} else if g.dungeon.IsWalkable(nx, ny) {
 			g.player.X, g.player.Y = nx, ny
 			g.cameraX = float64(g.player.X * TileSize)
 			g.cameraY = float64(g.player.Y * TileSize)
 			if p := g.potionAt(nx, ny); p != nil {
-				p.Taken = true
-				g.player.HP += p.Heal
-				if g.player.HP > g.player.MaxHP {
-					g.player.HP = g.player.MaxHP
+				if g.player.Inventory.Add(ItemHealthPotion) {
+					p.Taken = true
 				}
 			}
 		}
 	}
 	return nil
+}
+
+const inventoryCols = 5
+
+// updateInventory handles input while the inventory screen is open.
+func (g *Game) updateInventory() {
+	inv := g.player.Inventory
+	maxSlots := inv.MaxItems
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) || inpututil.IsKeyJustPressed(ebiten.KeyD) {
+		if g.inventoryCursor < maxSlots-1 {
+			g.inventoryCursor++
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowLeft) || inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		if g.inventoryCursor > 0 {
+			g.inventoryCursor--
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowDown) || inpututil.IsKeyJustPressed(ebiten.KeyS) {
+		if g.inventoryCursor+inventoryCols < maxSlots {
+			g.inventoryCursor += inventoryCols
+		}
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowUp) || inpututil.IsKeyJustPressed(ebiten.KeyW) {
+		if g.inventoryCursor >= inventoryCols {
+			g.inventoryCursor -= inventoryCols
+		}
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyU) && g.inventoryCursor < len(inv.Items) {
+		item := inv.Items[g.inventoryCursor]
+		if item.Category == CategoryConsumable && item.OnUse != nil {
+			if item.OnUse(g.player) {
+				inv.Remove(g.inventoryCursor)
+				if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
+					g.inventoryCursor--
+				}
+			}
+		}
+	}
 }
 
 // shouldMove returns true on the first frame the key is pressed, then after repeatDelayFrames, every repeatIntervalFrames.
@@ -301,8 +361,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		vector.DrawFilledRect(screen, barX, barY, hpWidth, 1, color.RGBA{224, 108, 117, 255}, false)
 	}
 
-	// HUD: player health
+	// HUD: player stats
+	inv := g.player.Inventory
 	text.Draw(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 4, 14, color.White)
+	text.Draw(screen, fmt.Sprintf("LVL: %d  EXP: %d / %d", g.player.Level, g.player.EXP, g.player.NextLevelEXP), g.hudFont, 4, 28, color.White)
+	text.Draw(screen, fmt.Sprintf("INV: %d / %d items  %.2f / %.2f kg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight), g.hudFont, 4, 42, color.White)
 
 	// Draw player
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
@@ -310,6 +373,114 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op.GeoM.Reset()
 	op.GeoM.Translate(playerPx, playerPy)
 	screen.DrawImage(g.playerImg, &op)
+
+	if g.inventoryOpen {
+		g.drawInventory(screen)
+	}
+}
+
+// drawInventory renders the inventory overlay.
+func (g *Game) drawInventory(screen *ebiten.Image) {
+	const (
+		panelX      = 30
+		panelY      = 30
+		panelW      = 580
+		panelH      = 380
+		slotSize    = 16
+		slotGap     = 4
+		slotStride  = slotSize + slotGap
+		gridX       = panelX + 20
+		gridY       = panelY + 50
+		detailX     = gridX + inventoryCols*slotStride + 30
+	)
+
+	// Dark overlay + panel background
+	vector.DrawFilledRect(screen, 0, 0, ScreenW, ScreenH, color.RGBA{0, 0, 0, 180}, false)
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, color.RGBA{28, 32, 42, 255}, false)
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, 1, color.RGBA{100, 110, 140, 255}, false)
+	vector.DrawFilledRect(screen, panelX, panelY+panelH, panelW, 1, color.RGBA{100, 110, 140, 255}, false)
+	vector.DrawFilledRect(screen, panelX, panelY, 1, panelH, color.RGBA{100, 110, 140, 255}, false)
+	vector.DrawFilledRect(screen, panelX+panelW, panelY, 1, panelH, color.RGBA{100, 110, 140, 255}, false)
+
+	text.Draw(screen, "INVENTORY", g.hudFont, panelX+10, panelY+18, color.White)
+	inv := g.player.Inventory
+	infoStr := fmt.Sprintf("%d / %d items   %.2f / %.2f kg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight)
+	text.Draw(screen, infoStr, g.hudFont, panelX+10, panelY+34, color.RGBA{160, 160, 160, 255})
+
+	// Slot grid
+	maxSlots := inv.MaxItems
+	rows := (maxSlots + inventoryCols - 1) / inventoryCols
+	for row := 0; row < rows; row++ {
+		for col := 0; col < inventoryCols; col++ {
+			idx := row*inventoryCols + col
+			if idx >= maxSlots {
+				break
+			}
+			sx := float32(gridX + col*slotStride)
+			sy := float32(gridY + row*slotStride)
+
+			selected := idx == g.inventoryCursor
+			bgCol := color.RGBA{45, 50, 62, 255}
+			if selected {
+				bgCol = color.RGBA{70, 90, 115, 255}
+			}
+			vector.DrawFilledRect(screen, sx, sy, slotSize, slotSize, bgCol, false)
+
+			// Item fill
+			if idx < len(inv.Items) {
+				ic := itemCategoryColor(inv.Items[idx].Category)
+				vector.DrawFilledRect(screen, sx+2, sy+2, slotSize-4, slotSize-4, ic, false)
+			}
+
+			// Border
+			borderCol := color.RGBA{80, 88, 108, 255}
+			if selected {
+				borderCol = color.RGBA{180, 200, 255, 255}
+			}
+			vector.DrawFilledRect(screen, sx, sy, slotSize, 1, borderCol, false)
+			vector.DrawFilledRect(screen, sx, sy+slotSize-1, slotSize, 1, borderCol, false)
+			vector.DrawFilledRect(screen, sx, sy, 1, slotSize, borderCol, false)
+			vector.DrawFilledRect(screen, sx+slotSize-1, sy, 1, slotSize, borderCol, false)
+		}
+	}
+
+	// Item detail panel
+	dy := gridY + 12
+	if g.inventoryCursor < len(inv.Items) {
+		item := inv.Items[g.inventoryCursor]
+		text.Draw(screen, item.ID, g.hudFont, detailX, dy, color.White)
+		dy += 20
+		text.Draw(screen, fmt.Sprintf("Type:   %s", item.Category), g.hudFont, detailX, dy, color.RGBA{160, 160, 160, 255})
+		dy += 16
+		text.Draw(screen, fmt.Sprintf("Weight: %.1f kg", item.Weight), g.hudFont, detailX, dy, color.RGBA{160, 160, 160, 255})
+		dy += 16
+		if item.Effect != "" {
+			text.Draw(screen, fmt.Sprintf("Effect: %s", item.Effect), g.hudFont, detailX, dy, color.RGBA{152, 210, 152, 255})
+			dy += 16
+		}
+		if item.Category == CategoryConsumable {
+			dy += 4
+			text.Draw(screen, "[U] Use", g.hudFont, detailX, dy, color.RGBA{220, 210, 100, 255})
+		}
+	} else {
+		text.Draw(screen, "Empty slot", g.hudFont, detailX, dy, color.RGBA{80, 80, 80, 255})
+	}
+
+	// Controls hint
+	text.Draw(screen, "[Arrows/WASD] Navigate   [U] Use   [I] Close", g.hudFont, panelX+10, panelY+panelH-14, color.RGBA{120, 120, 120, 255})
+}
+
+func itemCategoryColor(cat ItemCategory) color.RGBA {
+	switch cat {
+	case CategoryConsumable:
+		return color.RGBA{229, 192, 123, 255}
+	case CategoryEquipment:
+		return color.RGBA{97, 175, 239, 255}
+	case CategoryKeyItem:
+		return color.RGBA{198, 120, 221, 255}
+	default:
+		return color.RGBA{150, 150, 150, 255}
+	}
 }
 
 // Layout returns the logical screen size.
