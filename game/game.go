@@ -2,7 +2,11 @@ package game
 
 import (
 	"fmt"
+	"image"
 	"image/color"
+	_ "image/png"
+	"io/fs"
+	"log"
 	"math/rand"
 
 	"github.com/ephigenia/ebit-engine-game-1/dungeon"
@@ -33,25 +37,42 @@ var (
 
 // Game implements ebiten.Game.
 type Game struct {
-	dungeon  *dungeon.Dungeon
-	player   *Player
-	enemies  []*Enemy
-	cameraX  float64
-	cameraY  float64
+	dungeon                                                       *dungeon.Dungeon
+	player                                                        *Player
+	enemies                                                       []*Enemy
+	cameraX                                                       float64
+	cameraY                                                       float64
 	holdFramesUp, holdFramesDown, holdFramesLeft, holdFramesRight int
 
-	potions  []*Potion
+	potions []*Potion
+
+	// Per-tile floor variant index, dimensions match dungeon grid
+	floorVariants [][]int
 
 	// Cached images (created once, reused every frame to avoid allocation and GPU upload)
-	wallTileImg  *ebiten.Image
-	floorTileImg *ebiten.Image
-	playerImg    *ebiten.Image
-	enemyImg     *ebiten.Image
-	potionImg    *ebiten.Image
+	wallTileImg   *ebiten.Image
+	floorTileImgs []*ebiten.Image
+	playerImg     *ebiten.Image
+	enemyImg      *ebiten.Image
+	potionImg     *ebiten.Image
+}
+
+// loadImage decodes a PNG from the given FS path into an *ebiten.Image.
+func loadImage(fsys fs.FS, path string) *ebiten.Image {
+	f, err := fsys.Open(path)
+	if err != nil {
+		log.Fatalf("open %s: %v", path, err)
+	}
+	defer f.Close()
+	img, _, err := image.Decode(f)
+	if err != nil {
+		log.Fatalf("decode %s: %v", path, err)
+	}
+	return ebiten.NewImageFromImage(img)
 }
 
 // New creates a new game with a generated dungeon.
-func New() *Game {
+func New(assets fs.FS) *Game {
 	cfg := dungeon.DefaultConfig()
 	d := dungeon.Generate(cfg)
 	g := &Game{dungeon: d}
@@ -59,8 +80,9 @@ func New() *Game {
 	// Create tile and entity images once (reused every frame)
 	g.wallTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
 	g.wallTileImg.Fill(colorWall)
-	g.floorTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
-	g.floorTileImg.Fill(colorFloor)
+	for i := 1; i <= 8; i++ {
+		g.floorTileImgs = append(g.floorTileImgs, loadImage(assets, fmt.Sprintf("assets/grass_tile_%d.png", i)))
+	}
 	g.playerImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.playerImg.Fill(colorPlayer)
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
@@ -85,6 +107,16 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 	g.cameraY = float64(startY * TileSize)
 
 	rng := rand.New(rand.NewSource(rand.Int63()))
+
+	// Assign a random floor tile variant to every cell in the grid
+	g.floorVariants = make([][]int, d.Height)
+	for y := 0; y < d.Height; y++ {
+		g.floorVariants[y] = make([]int, d.Width)
+		for x := 0; x < d.Width; x++ {
+			g.floorVariants[y][x] = rng.Intn(len(g.floorTileImgs))
+		}
+	}
+
 	g.enemies = g.enemies[:0]
 	// Spawn one enemy per room, skipping the starting room
 	for i := 1; i < len(d.Rooms); i++ {
@@ -235,7 +267,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if t == dungeon.Wall {
 				screen.DrawImage(g.wallTileImg, &op)
 			} else {
-				screen.DrawImage(g.floorTileImg, &op)
+				v := g.floorVariants[ty][tx]
+				screen.DrawImage(g.floorTileImgs[v], &op)
 			}
 		}
 	}
