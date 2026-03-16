@@ -283,6 +283,13 @@ func (g *Game) updateInventory() {
 			}
 		}
 	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyX) && g.inventoryCursor < len(inv.Items) {
+		inv.Remove(g.inventoryCursor)
+		if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
+			g.inventoryCursor--
+		}
+	}
 }
 
 // shouldMove returns true on the first frame the key is pressed, then after repeatDelayFrames, every repeatIntervalFrames.
@@ -454,13 +461,15 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 		if item.Category == CategoryConsumable {
 			dy += 4
 			text.Draw(screen, "[U] Use", g.hudFont, detailX, dy, color.RGBA{220, 210, 100, 255})
+			dy += 16
 		}
+		text.Draw(screen, "[X] Destroy", g.hudFont, detailX, dy, color.RGBA{200, 80, 80, 255})
 	} else {
 		text.Draw(screen, "Empty slot", g.hudFont, detailX, dy, color.RGBA{80, 80, 80, 255})
 	}
 
 	// Controls hint
-	text.Draw(screen, "[Arrows/WASD] Navigate   [U] Use   [I] Close", g.hudFont, panelX+10, panelY+panelH-14, color.RGBA{120, 120, 120, 255})
+	text.Draw(screen, "[Arrows/WASD] Navigate   [U] Use   [X] Destroy   [I] Close", g.hudFont, panelX+10, panelY+panelH-14, color.RGBA{120, 120, 120, 255})
 }
 
 

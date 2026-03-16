@@ -25,7 +25,7 @@ type Item struct {
 	OnUse    func(p *Player) bool // returns true if the item is consumed on use
 }
 
-func newHealPotion(id string, weight float64, heal int, col color.RGBA) *Item {
+func newConsumable(id string, weight float64, heal int, col color.RGBA) *Item {
 	effect := fmt.Sprintf("Restores %d HP", heal)
 	return &Item{
 		ID:       id,
@@ -48,10 +48,29 @@ func newHealPotion(id string, weight float64, heal int, col color.RGBA) *Item {
 
 // Predefined item definitions.
 var (
-	ItemSmallHealthPotion  = newHealPotion("small_health_potion", 0.3, 5, color.RGBA{210, 120, 120, 255})
-	ItemMediumHealthPotion = newHealPotion("medium_health_potion", 0.5, 10, color.RGBA{210, 80, 80, 255})
-	ItemLargeHealthPotion  = newHealPotion("large_health_potion", 0.8, 20, color.RGBA{180, 30, 30, 255})
+	// Health potions
+	ItemSmallHealthPotion  = newConsumable("small_health_potion", 0.3, 5, color.RGBA{210, 120, 120, 255})
+	ItemMediumHealthPotion = newConsumable("medium_health_potion", 0.5, 10, color.RGBA{210, 80, 80, 255})
+	ItemLargeHealthPotion  = newConsumable("large_health_potion", 0.8, 20, color.RGBA{180, 30, 30, 255})
 
-	// HealthPotions is the pool used for random potion spawning.
-	HealthPotions = []*Item{ItemSmallHealthPotion, ItemMediumHealthPotion, ItemLargeHealthPotion}
+	// Food items
+	ItemBreadRoll    = newConsumable("bread_roll", 0.1, 2, color.RGBA{210, 175, 125, 255})
+	ItemBreadLoaf    = newConsumable("bread_loaf", 0.4, 4, color.RGBA{190, 145, 90, 255})
+	ItemFlatbread    = newConsumable("flatbread", 0.2, 3, color.RGBA{215, 190, 135, 255})
+	ItemCrackers     = newConsumable("crackers", 0.1, 1, color.RGBA{200, 178, 130, 255})
+	ItemSmokedSausa  = newConsumable("smoked_sausage", 0.3, 8, color.RGBA{148, 78, 48, 255})
+	ItemDriedMeat    = newConsumable("dried_meat", 0.2, 4, color.RGBA{158, 100, 58, 255})
+	ItemMeatPie      = newConsumable("meat_pie", 0.4, 8, color.RGBA{138, 88, 52, 255})
+	ItemApple        = newConsumable("apple", 0.2, 3, color.RGBA{168, 88, 65, 255})
+	ItemCarrot       = newConsumable("carrot", 0.1, 1, color.RGBA{198, 118, 55, 255})
+	ItemMushroom     = newConsumable("mushroom", 0.1, 1, color.RGBA{172, 138, 98, 255})
+	ItemHoneycomb    = newConsumable("honeycomb", 0.2, 3, color.RGBA{208, 158, 48, 255})
+
+	// SpawnableItems is the combined pool used for random map pickup spawning.
+	SpawnableItems = []*Item{
+		ItemSmallHealthPotion, ItemMediumHealthPotion, ItemLargeHealthPotion,
+		ItemBreadRoll, ItemBreadLoaf, ItemFlatbread, ItemCrackers,
+		ItemSmokedSausa, ItemDriedMeat, ItemMeatPie,
+		ItemApple, ItemCarrot, ItemMushroom, ItemHoneycomb,
+	}
 )

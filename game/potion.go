@@ -9,8 +9,8 @@ type Potion struct {
 	Taken bool
 }
 
-// newPotion creates a potion at (x, y) with a randomly chosen potion type.
+// newPotion creates a pickup at (x, y) with a randomly chosen item from the spawn pool.
 func newPotion(x, y int, rng *rand.Rand) *Potion {
-	item := HealthPotions[rng.Intn(len(HealthPotions))]
+	item := SpawnableItems[rng.Intn(len(SpawnableItems))]
 	return &Potion{X: x, Y: y, Item: item}
 }
