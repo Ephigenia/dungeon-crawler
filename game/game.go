@@ -2,18 +2,18 @@ package game
 
 import (
 	"fmt"
-	"image"
 	"image/color"
-	_ "image/png"
 	"io/fs"
 	"log"
 	"math/rand"
 
 	"github.com/ephigenia/ebit-engine-game-1/dungeon"
 	"github.com/hajimehoshi/ebiten/v2"
-	"github.com/hajimehoshi/ebiten/v2/ebitenutil"
 	"github.com/hajimehoshi/ebiten/v2/inpututil"
+	"github.com/hajimehoshi/ebiten/v2/text"
 	"github.com/hajimehoshi/ebiten/v2/vector"
+	"golang.org/x/image/font"
+	"golang.org/x/image/font/opentype"
 )
 
 const (
@@ -46,29 +46,14 @@ type Game struct {
 
 	potions []*Potion
 
-	// Per-tile floor variant index, dimensions match dungeon grid
-	floorVariants [][]int
+	hudFont font.Face
 
 	// Cached images (created once, reused every frame to avoid allocation and GPU upload)
-	wallTileImg   *ebiten.Image
-	floorTileImgs []*ebiten.Image
-	playerImg     *ebiten.Image
-	enemyImg      *ebiten.Image
-	potionImg     *ebiten.Image
-}
-
-// loadImage decodes a PNG from the given FS path into an *ebiten.Image.
-func loadImage(fsys fs.FS, path string) *ebiten.Image {
-	f, err := fsys.Open(path)
-	if err != nil {
-		log.Fatalf("open %s: %v", path, err)
-	}
-	defer f.Close()
-	img, _, err := image.Decode(f)
-	if err != nil {
-		log.Fatalf("decode %s: %v", path, err)
-	}
-	return ebiten.NewImageFromImage(img)
+	wallTileImg  *ebiten.Image
+	floorTileImg *ebiten.Image
+	playerImg    *ebiten.Image
+	enemyImg     *ebiten.Image
+	potionImg    *ebiten.Image
 }
 
 // New creates a new game with a generated dungeon.
@@ -77,12 +62,29 @@ func New(assets fs.FS) *Game {
 	d := dungeon.Generate(cfg)
 	g := &Game{dungeon: d}
 
+	// Load HUD font
+	fontData, err := fs.ReadFile(assets, "assets/Gorgeous-Pixel/GorgeousPixel.ttf")
+	if err != nil {
+		log.Fatalf("read font: %v", err)
+	}
+	tt, err := opentype.Parse(fontData)
+	if err != nil {
+		log.Fatalf("parse font: %v", err)
+	}
+	g.hudFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
+		Size:    16,
+		DPI:     72,
+		Hinting: font.HintingFull,
+	})
+	if err != nil {
+		log.Fatalf("new font face: %v", err)
+	}
+
 	// Create tile and entity images once (reused every frame)
 	g.wallTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
 	g.wallTileImg.Fill(colorWall)
-	for i := 1; i <= 8; i++ {
-		g.floorTileImgs = append(g.floorTileImgs, loadImage(assets, fmt.Sprintf("assets/grass_tile_%d.png", i)))
-	}
+	g.floorTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
+	g.floorTileImg.Fill(colorFloor)
 	g.playerImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.playerImg.Fill(colorPlayer)
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
@@ -107,15 +109,6 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 	g.cameraY = float64(startY * TileSize)
 
 	rng := rand.New(rand.NewSource(rand.Int63()))
-
-	// Assign a random floor tile variant to every cell in the grid
-	g.floorVariants = make([][]int, d.Height)
-	for y := 0; y < d.Height; y++ {
-		g.floorVariants[y] = make([]int, d.Width)
-		for x := 0; x < d.Width; x++ {
-			g.floorVariants[y][x] = rng.Intn(len(g.floorTileImgs))
-		}
-	}
 
 	g.enemies = g.enemies[:0]
 	// Spawn one enemy per room, skipping the starting room
@@ -166,6 +159,10 @@ func (g *Game) enemyAt(x, y int) *Enemy {
 
 // Update handles input, combat, and movement.
 func (g *Game) Update() error {
+	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
+		return ebiten.Termination
+	}
+
 	up := ebiten.IsKeyPressed(ebiten.KeyArrowUp) || ebiten.IsKeyPressed(ebiten.KeyW)
 	down := ebiten.IsKeyPressed(ebiten.KeyArrowDown) || ebiten.IsKeyPressed(ebiten.KeyS)
 	left := ebiten.IsKeyPressed(ebiten.KeyArrowLeft) || ebiten.IsKeyPressed(ebiten.KeyA)
@@ -267,8 +264,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 			if t == dungeon.Wall {
 				screen.DrawImage(g.wallTileImg, &op)
 			} else {
-				v := g.floorVariants[ty][tx]
-				screen.DrawImage(g.floorTileImgs[v], &op)
+				screen.DrawImage(g.floorTileImg, &op)
 			}
 		}
 	}
@@ -306,7 +302,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// HUD: player health
-	ebitenutil.DebugPrintAt(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), 4, 4)
+	text.Draw(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 4, 20, color.White)
 
 	// Draw player
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2

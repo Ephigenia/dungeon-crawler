@@ -8,7 +8,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2"
 )
 
-//go:embed assets/*.png
+//go:embed assets/Gorgeous-Pixel/GorgeousPixel.ttf
 var assets embed.FS
 
 func main() {
