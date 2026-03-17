@@ -9,6 +9,7 @@ import (
 )
 
 //go:embed assets/Gorgeous-Pixel/GorgeousPixel.ttf
+//go:embed assets/items
 var assets embed.FS
 
 func main() {

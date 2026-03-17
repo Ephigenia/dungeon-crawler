@@ -22,3 +22,10 @@ go build -o dungeon-crawler . && ./dungeon-crawler
 - `dungeon/` – procedural dungeon generation (rooms + corridors)
 
 The camera follows the player; the dungeon is larger than the screen so you explore by moving.
+
+
+## Ideas
+
+- add image reader with offsets
+- images with animations
+- load assets in main instead of in game.go

@@ -2,7 +2,9 @@ package game
 
 import (
 	"fmt"
+	"image"
 	"image/color"
+	_ "image/png"
 	"io/fs"
 	"log"
 	"math/rand"
@@ -45,10 +47,10 @@ type Game struct {
 
 	potions []*Potion
 
-	inventoryOpen    bool
-	inventoryFocus   bool // true = item grid, false = equipment slots
-	inventoryCursor  int
-	equipmentCursor  int
+	inventoryOpen   bool
+	inventoryFocus  bool // true = item grid, false = equipment slots
+	inventoryCursor int
+	equipmentCursor int
 
 	hudFont font.Face
 
@@ -92,6 +94,28 @@ func New(assets fs.FS) *Game {
 	g.playerImg.Fill(colorPlayer)
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.enemyImg.Fill(colorEnemy)
+
+	// Load item sprites
+	for _, entry := range []struct {
+		path string
+		item *Item
+	}{
+		{"assets/items/health_potion_small.png", ItemSmallHealthPotion},
+		{"assets/items/health_potion_medium.png", ItemMediumHealthPotion},
+		{"assets/items/health_potion_large.png", ItemLargeHealthPotion},
+		{"assets/items/apple.png", ItemApple},
+		{"assets/items/bread_roll.png", ItemBreadRoll},
+		{"assets/items/mushroom.png", ItemMushroom},
+		{"assets/items/meat.png", ItemMeat},
+		{"assets/items/grapes.png", ItemGrapes},
+	} {
+		if f, err := assets.Open(entry.path); err == nil {
+			if img, _, err := image.Decode(f); err == nil {
+				entry.item.Image = ebiten.NewImageFromImage(img)
+			}
+			f.Close()
+		}
+	}
 
 	g.resetEntities(d)
 	return g
@@ -380,14 +404,22 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	}
 
 	// Draw untaken potions
-	const potionSize = 8
+	const potionSize = 16
 	for _, p := range g.potions {
 		if p.Taken {
 			continue
 		}
 		px := float32(float64(p.X*TileSize) + offsetX + float64(TileSize-potionSize)/2)
 		py := float32(float64(p.Y*TileSize) + offsetY + float64(TileSize-potionSize)/2)
-		vector.DrawFilledRect(screen, px, py, potionSize, potionSize, p.Item.Color, false)
+		if p.Item.Image != nil {
+			iop := &ebiten.DrawImageOptions{}
+			iw, ih := p.Item.Image.Bounds().Dx(), p.Item.Image.Bounds().Dy()
+			iop.GeoM.Scale(float64(potionSize)/float64(iw), float64(potionSize)/float64(ih))
+			iop.GeoM.Translate(float64(px), float64(py))
+			screen.DrawImage(p.Item.Image, iop)
+		} else {
+			vector.DrawFilledRect(screen, px, py, potionSize, potionSize, p.Item.Color, false)
+		}
 	}
 
 	// Draw living enemies with HP bar
@@ -499,7 +531,16 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 			}
 			vector.DrawFilledRect(screen, sx, sy, slotSize, slotSize, bgCol, false)
 			if idx < len(inv.Items) {
-				vector.DrawFilledRect(screen, sx+2, sy+2, slotSize-4, slotSize-4, inv.Items[idx].Color, false)
+				item := inv.Items[idx]
+				if item.Image != nil {
+					iop := &ebiten.DrawImageOptions{}
+					iw, ih := item.Image.Bounds().Dx(), item.Image.Bounds().Dy()
+					iop.GeoM.Scale(float64(slotSize)/float64(iw), float64(slotSize)/float64(ih))
+					iop.GeoM.Translate(float64(sx), float64(sy))
+					screen.DrawImage(item.Image, iop)
+				} else {
+					vector.DrawFilledRect(screen, sx+2, sy+2, slotSize-4, slotSize-4, item.Color, false)
+				}
 			}
 			borderCol := color.RGBA{80, 88, 108, 255}
 			if selected {
@@ -515,10 +556,10 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	// --- Equipment slot list ---
 	// columns: label | swatch | name | weight | effect
 	const (
-		colSwatch  = equipX + 58
-		colName    = equipX + 66
-		colWeight  = equipX + 178
-		colEffect  = equipX + 222
+		colSwatch = equipX + 58
+		colName   = equipX + 66
+		colWeight = equipX + 178
+		colEffect = equipX + 222
 	)
 	for i, slot := range EquipmentSlotOrder {
 		ey := equipY + i*equipRowH
@@ -534,7 +575,15 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 
 		equipped := g.player.Equipment.Slots[slot]
 		if equipped != nil {
-			vector.DrawFilledRect(screen, float32(colSwatch), float32(ey-8), 6, 6, equipped.Color, false)
+			if equipped.Image != nil {
+				iop := &ebiten.DrawImageOptions{}
+				iw, ih := equipped.Image.Bounds().Dx(), equipped.Image.Bounds().Dy()
+				iop.GeoM.Scale(6.0/float64(iw), 6.0/float64(ih))
+				iop.GeoM.Translate(float64(colSwatch), float64(ey-8))
+				screen.DrawImage(equipped.Image, iop)
+			} else {
+				vector.DrawFilledRect(screen, float32(colSwatch), float32(ey-8), 6, 6, equipped.Color, false)
+			}
 			text.Draw(screen, equipped.ID, g.hudFont, colName, ey, equipped.Color)
 			text.Draw(screen, fmt.Sprintf("%.1fkg", equipped.Weight), g.hudFont, colWeight, ey, dim)
 			if equipped.Effect != "" {
@@ -608,7 +657,6 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	text.Draw(screen, "[Tab] Switch   [Arrows/WASD] Navigate   [U/Enter] Action   [X] Destroy   [I] Close",
 		g.hudFont, panelX+6, panelY+panelH-10, color.RGBA{100, 100, 100, 255})
 }
-
 
 // Layout returns the logical screen size.
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

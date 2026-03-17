@@ -28,27 +28,27 @@ var EquipmentSlotOrder = []EquipmentSlot{
 func slotLabel(s EquipmentSlot) string {
 	switch s {
 	case SlotHead:
-		return "HEAD   "
+		return "HEAD"
 	case SlotBody:
-		return "BODY   "
+		return "BODY"
 	case SlotLegs:
-		return "LEGS   "
+		return "LEGS"
 	case SlotFeet:
-		return "FEET   "
+		return "FEET"
 	case SlotNecklace:
-		return "NECK   "
+		return "NECK"
 	case SlotLeftHand:
-		return "L.HAND "
+		return "L.HAND"
 	case SlotRightHand:
-		return "R.HAND "
+		return "R.HAND"
 	case SlotLeftRing:
-		return "L.RING "
+		return "L.RING"
 	case SlotRightRing:
-		return "R.RING "
+		return "R.RING"
 	case SlotLeftWeapon:
-		return "L.WEAP "
+		return "L.WEAP"
 	case SlotRightWeapon:
-		return "R.WEAP "
+		return "R.WEAP"
 	case SlotBackpack:
 		return "BACKPCK"
 	}

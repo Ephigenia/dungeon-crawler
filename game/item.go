@@ -3,6 +3,8 @@ package game
 import (
 	"fmt"
 	"image/color"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 // ItemCategory classifies an item's general purpose.
@@ -23,6 +25,7 @@ type Item struct {
 	Category ItemCategory
 	Slot     EquipmentSlot // only set for CategoryEquipment items
 	Color    color.RGBA
+	Image    *ebiten.Image // optional sprite; falls back to Color if nil
 	Effect   string
 	StatMods StatModifiers
 	OnUse    func(p *Player) bool // returns true if the item is consumed on use
@@ -57,17 +60,19 @@ var (
 	ItemLargeHealthPotion  = newConsumable("large_health_potion", 0.8, 20, color.RGBA{180, 30, 30, 255})
 
 	// Food items
-	ItemBreadRoll    = newConsumable("bread_roll", 0.1, 2, color.RGBA{210, 175, 125, 255})
-	ItemBreadLoaf    = newConsumable("bread_loaf", 0.4, 4, color.RGBA{190, 145, 90, 255})
-	ItemFlatbread    = newConsumable("flatbread", 0.2, 3, color.RGBA{215, 190, 135, 255})
-	ItemCrackers     = newConsumable("crackers", 0.1, 1, color.RGBA{200, 178, 130, 255})
-	ItemSmokedSausa  = newConsumable("smoked_sausage", 0.3, 8, color.RGBA{148, 78, 48, 255})
-	ItemDriedMeat    = newConsumable("dried_meat", 0.2, 4, color.RGBA{158, 100, 58, 255})
-	ItemMeatPie      = newConsumable("meat_pie", 0.4, 8, color.RGBA{138, 88, 52, 255})
-	ItemApple        = newConsumable("apple", 0.2, 3, color.RGBA{168, 88, 65, 255})
-	ItemCarrot       = newConsumable("carrot", 0.1, 1, color.RGBA{198, 118, 55, 255})
-	ItemMushroom     = newConsumable("mushroom", 0.1, 1, color.RGBA{172, 138, 98, 255})
-	ItemHoneycomb    = newConsumable("honeycomb", 0.2, 3, color.RGBA{208, 158, 48, 255})
+	// ItemBreadLoaf   = newConsumable("bread_loaf", 0.4, 4, color.RGBA{190, 145, 90, 255})
+	// ItemFlatbread   = newConsumable("flatbread", 0.2, 3, color.RGBA{215, 190, 135, 255})
+	// ItemCrackers    = newConsumable("crackers", 0.1, 1, color.RGBA{200, 178, 130, 255})
+	// ItemSmokedSausa = newConsumable("smoked_sausage", 0.3, 8, color.RGBA{148, 78, 48, 255})
+	// ItemMeatPie     = newConsumable("meat_pie", 0.4, 8, color.RGBA{138, 88, 52, 255})
+	// ItemCarrot      = newConsumable("carrot", 0.1, 1, color.RGBA{198, 118, 55, 255})
+	// ItemHoneycomb   = newConsumable("honeycomb", 0.2, 3, color.RGBA{208, 158, 48, 255})
+
+	ItemBreadRoll = newConsumable("bread_roll", 0.1, 2, color.RGBA{210, 175, 125, 255})
+	ItemGrapes    = newConsumable("grapes", 0.1, 3, color.RGBA{158, 100, 58, 255})
+	ItemMeat      = newConsumable("meat", 0.2, 4, color.RGBA{158, 100, 58, 255})
+	ItemApple     = newConsumable("apple", 0.2, 3, color.RGBA{168, 88, 65, 255})
+	ItemMushroom  = newConsumable("mushroom", 0.1, 1, color.RGBA{172, 138, 98, 255})
 
 	// Equipment items
 	ItemLeatherHelmet = &Item{
@@ -136,9 +141,7 @@ var (
 	// SpawnableItems is the combined pool used for random map pickup spawning.
 	SpawnableItems = []*Item{
 		ItemSmallHealthPotion, ItemMediumHealthPotion, ItemLargeHealthPotion,
-		ItemBreadRoll, ItemBreadLoaf, ItemFlatbread, ItemCrackers,
-		ItemSmokedSausa, ItemDriedMeat, ItemMeatPie,
-		ItemApple, ItemCarrot, ItemMushroom, ItemHoneycomb,
+		ItemApple, ItemMushroom, ItemGrapes, ItemMeat,
 		ItemLeatherHelmet, ItemLeatherArmor, ItemLeatherBoots, ItemLeatherLegs,
 		ItemIronSword, ItemWoodenShield, ItemGoldNecklace, ItemGoldRing, ItemSilverRing,
 		ItemSmallBackpack, ItemMediumBackpack, ItemLargeBackpack,
