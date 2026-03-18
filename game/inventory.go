@@ -9,7 +9,7 @@ type Inventory struct {
 
 func newInventory() *Inventory {
 	return &Inventory{
-		MaxWeight: 5.0,
+		MaxWeight: 20.0,
 		MaxItems:  15,
 	}
 }
@@ -24,8 +24,15 @@ func (inv *Inventory) CurrentWeight() float64 {
 }
 
 // CanAdd reports whether item can be added without exceeding limits.
+// Backpacks that increase weight capacity bypass the weight check.
 func (inv *Inventory) CanAdd(item *Item) bool {
-	return len(inv.Items) < inv.MaxItems && inv.CurrentWeight()+item.Weight <= inv.MaxWeight
+	if len(inv.Items) >= inv.MaxItems {
+		return false
+	}
+	if item.Category == CategoryBackpack && item.StatMods.InvWeight > 0 {
+		return true
+	}
+	return inv.CurrentWeight()+item.Weight <= inv.MaxWeight
 }
 
 // Add adds the item to the inventory. Returns false if limits would be exceeded.

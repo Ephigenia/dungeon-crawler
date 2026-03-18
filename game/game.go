@@ -25,8 +25,8 @@ const (
 	PlayerSize = 14
 
 	// Key repeat: move on first frame, then after this many frames move every frame while held
-	repeatDelayFrames    = 4 // ~67ms before repeat starts
-	repeatIntervalFrames = 1 // move every frame when holding
+	repeatDelayFrames    = 8 // ~133ms before repeat starts
+	repeatIntervalFrames = 3 // move every 3 frames when holding (~20 steps/sec)
 )
 
 var (
@@ -47,6 +47,9 @@ type Game struct {
 
 	potions []*Potion
 	rng     *rand.Rand
+
+	combatLines  []string
+	combatFrames int
 
 	inventoryOpen   bool
 	inventoryFocus  bool // true = item grid, false = equipment slots
@@ -153,6 +156,8 @@ func New(assets fs.FS) *Game {
 		{"assets/items/gear/shoes/shoes_simple.png", ItemSimpleShoes},
 		// items // gear // shield
 		{"assets/items/shield/shield_metal.png", ItemMetalShield},
+		{"assets/items/shield/shield_bronze.png", ItemBronzeShield},
+		{"assets/items/shield/shield_gold.png", ItemGoldShield},
 		{"assets/items/shield/shield_wood.png", ItemWoodenShield},
 		// items // gear // armor
 		{"assets/items/armor/basic.png", ItemBasicArmor},
@@ -237,6 +242,9 @@ func (g *Game) enemyAt(x, y int) *Enemy {
 
 // Update handles input, combat, and movement.
 func (g *Game) Update() error {
+	if g.combatFrames > 0 {
+		g.combatFrames--
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		return ebiten.Termination
 	}
@@ -296,31 +304,47 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		g.Regenerate()
 	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
+		if p := g.potionAt(g.player.X, g.player.Y); p != nil {
+			if g.player.Inventory.Add(p.Item) {
+				p.Taken = true
+			}
+		}
+	}
 	if dx != 0 || dy != 0 {
 		nx, ny := g.player.X+dx, g.player.Y+dy
 		if e := g.enemyAt(nx, ny); e != nil {
 			// Bump attack: player hits enemy, enemy retaliates
+			hpBefore := e.HP
 			e.TakeDamage(g.player.Attack)
+			dmg := hpBefore - e.HP
 			g.player.AddEXP(5)
 			if e.IsAlive() {
+				playerHpBefore := g.player.HP
 				g.player.TakeDamage(e.Attack)
+				playerDmg := playerHpBefore - g.player.HP
+				g.combatLines = []string{
+					fmt.Sprintf("Hit %s for %d damage", e.Name, dmg),
+					fmt.Sprintf("%s  %d / %d HP", e.Name, e.HP, e.MaxHP),
+					fmt.Sprintf("%s hits you for %d damage", e.Name, playerDmg),
+				}
 			} else {
 				g.player.AddEXP(20)
+				g.combatLines = []string{
+					fmt.Sprintf("Hit %s for %d damage", e.Name, dmg),
+					fmt.Sprintf("%s defeated!", e.Name),
+				}
 				dropChance := 10 + (g.player.Level - 1)
 				if g.rng.Intn(100) < dropChance {
 					drop := newPotion(e.X, e.Y, g.rng)
 					g.potions = append(g.potions, drop)
 				}
 			}
+			g.combatFrames = 120
 		} else if g.dungeon.IsWalkable(nx, ny) {
 			g.player.X, g.player.Y = nx, ny
 			g.cameraX = float64(g.player.X * TileSize)
 			g.cameraY = float64(g.player.Y * TileSize)
-			if p := g.potionAt(nx, ny); p != nil {
-				if g.player.Inventory.Add(p.Item) {
-					p.Taken = true
-				}
-			}
 		}
 	}
 	return nil
@@ -543,6 +567,37 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	op.GeoM.Scale(float64(PlayerSize)/float64(iw), float64(PlayerSize)/float64(ih))
 	op.GeoM.Translate(playerPx, playerPy)
 	screen.DrawImage(g.playerImg, &op)
+
+	// Combat notification (center screen, 2 seconds)
+	if g.combatFrames > 0 {
+		lineH := 14
+		boxW := float32(220)
+		boxH := float32(len(g.combatLines)*lineH + 16)
+		boxX := float32(ScreenW)/2 - boxW/2
+		boxY := float32(ScreenH)/2 - boxH/2
+		border := color.RGBA{100, 110, 140, 255}
+		vector.DrawFilledRect(screen, boxX, boxY, boxW, boxH, color.RGBA{20, 22, 30, 220}, false)
+		vector.DrawFilledRect(screen, boxX, boxY, boxW, 1, border, false)
+		vector.DrawFilledRect(screen, boxX, boxY+boxH, boxW, 1, border, false)
+		vector.DrawFilledRect(screen, boxX, boxY, 1, boxH, border, false)
+		vector.DrawFilledRect(screen, boxX+boxW, boxY, 1, boxH, border, false)
+		lineColors := []color.RGBA{
+			{220, 200, 60, 255},  // yellow: hit line
+			{200, 120, 120, 255}, // red: enemy HP or defeat
+			{224, 108, 117, 255}, // pink: retaliation
+		}
+		for i, line := range g.combatLines {
+			col := lineColors[i%len(lineColors)]
+			lx := int(boxX) + int(boxW)/2 - len(line)*3
+			ly := int(boxY) + 12 + i*lineH
+			text.Draw(screen, line, g.hudFont, lx, ly, col)
+		}
+	}
+
+	// Bottom-left: name of item the player is standing on
+	if p := g.potionAt(g.player.X, g.player.Y); p != nil {
+		text.Draw(screen, p.Item.ID, g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
+	}
 
 	if g.inventoryOpen {
 		g.drawInventory(screen)

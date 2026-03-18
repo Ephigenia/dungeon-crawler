@@ -26,6 +26,10 @@ The camera follows the player; the dungeon is larger than the screen so you expl
 
 ## Ideas
 
+- asset and item / player assignment abstraction
+- -asset abstraction with images and offsets
+- asset abstraction with animations
+- 
 - items require a certain level or stats to be able to equipped
 - list of slots an item can be equipped on should be an array so that items can be equipped on left or right hand 
 - quick belt
