@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"image"
 	"image/color"
-	_ "image/png"
 	"io/fs"
 	"log"
 	"math/rand"
@@ -107,71 +106,8 @@ func New(assets fs.FS) *Game {
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.enemyImg.Fill(colorEnemy)
 
-	// Load item sprites
-	for _, entry := range []struct {
-		path string
-		item *Item
-	}{
-		{"assets/items/health_potion_large.png", ItemLargeHealthPotion},
-		{"assets/items/health_potion_medium.png", ItemMediumHealthPotion},
-		{"assets/items/health_potion_small.png", ItemSmallHealthPotion},
-		// food
-		{"assets/items/food/apple.png", ItemApple},
-		{"assets/items/food/bread_roll.png", ItemBreadRoll},
-		{"assets/items/food/egg_fried.png", ItemFriedEgg},
-		{"assets/items/food/grapes.png", ItemGrapes},
-		{"assets/items/food/meat.png", ItemMeat},
-		{"assets/items/food/mushroom.png", ItemMushroom},
-		{"assets/items/food/pizza_slice.png", ItemPizzaSlice},
-		// items // gear // backpack
-		{"assets/items/gear/backpack/basic.png", ItemSmallBackpack},
-		{"assets/items/gear/backpack/medium.png", ItemMediumBackpack},
-		{"assets/items/gear/backpack/large.png", ItemLargeBackpack},
-		// items // gear // legs
-		{"assets/items/gear/legs/pants.png", ItemPants},
-		// items // accessories
-		{"assets/items/accessories/necklace_diamond.png", ItemNecklaceDiamond},
-		{"assets/items/accessories/necklace_skull.png", ItemNecklaceSkull},
-		{"assets/items/accessories/necklace_star.png", ItemNecklaceStar},
-		{"assets/items/accessories/necklace_tooth.png", ItemNecklaceTooth},
-		{"assets/items/accessories/ring_diamond.png", ItemDiamondRing},
-		{"assets/items/accessories/ring_diamond_2.png", ItemDiamondRing2},
-		{"assets/items/accessories/ring_gold.png", ItemGoldRing},
-		{"assets/items/accessories/ring_silver.png", ItemSilverRing},
-		// items // gear // gloves
-		{"assets/items/gear/gloves/gloves_finger.png", ItemGlovesFinger},
-		{"assets/items/gear/gloves/gloves_leather_metal.png", ItemGlovesLeatherMetal},
-		{"assets/items/gear/gloves/gloves_leather.png", ItemGlovesLeather},
-		{"assets/items/gear/gloves/gloves_metal.png", ItemGlovesMetal},
-		// items // gear // head
-		{"assets/items/gear/head/basic_helmet.png", ItemBasicHelmet},
-		{"assets/items/gear/head/coif.png", ItemCoif},
-		{"assets/items/gear/head/full_helmet.png", ItemFullHelmet},
-		{"assets/items/gear/head/gold_helmet.png", ItemGoldHelmet},
-		{"assets/items/gear/head/horn_helmet.png", ItemHornHelmet},
-		// items // gear // shoes
-		{"assets/items/gear/shoes/shoes_gold.png", ItemGoldShoes},
-		{"assets/items/gear/shoes/shoes_leather.png", ItemLeatherShoes},
-		{"assets/items/gear/shoes/shoes_metal.png", ItemMetalShoes},
-		{"assets/items/gear/shoes/shoes_simple.png", ItemSimpleShoes},
-		// items // gear // shield
-		{"assets/items/shield/shield_metal.png", ItemMetalShield},
-		{"assets/items/shield/shield_bronze.png", ItemBronzeShield},
-		{"assets/items/shield/shield_gold.png", ItemGoldShield},
-		{"assets/items/shield/shield_wood.png", ItemWoodenShield},
-		// items // gear // armor
-		{"assets/items/armor/basic.png", ItemBasicArmor},
-		{"assets/items/armor/bronze.png", ItemBronzeArmor},
-		{"assets/items/armor/complex.png", ItemComplexArmor},
-		{"assets/items/armor/gold.png", ItemGoldArmor},
-	} {
-		if f, err := assets.Open(entry.path); err == nil {
-			if img, _, err := image.Decode(f); err == nil {
-				entry.item.Image = ebiten.NewImageFromImage(img)
-			}
-			f.Close()
-		}
-	}
+	// Load item sprites from assets (see item_images.go)
+	loadItemImages(assets)
 
 	g.resetEntities(d)
 	return g
