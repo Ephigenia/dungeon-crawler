@@ -26,6 +26,11 @@ The camera follows the player; the dungeon is larger than the screen so you expl
 
 ## Ideas
 
+- pickup items with key?
+- drop items with key?
+- diablo like
+  - attributes influence weapons
+  - different attack modes
 - add image reader with offsets
 - images with animations
 - load assets in main instead of in game.go

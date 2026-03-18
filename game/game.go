@@ -91,8 +91,16 @@ func New(assets fs.FS) *Game {
 	g.wallTileImg.Fill(colorWall)
 	g.floorTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
 	g.floorTileImg.Fill(colorFloor)
-	g.playerImg = ebiten.NewImage(PlayerSize, PlayerSize)
-	g.playerImg.Fill(colorPlayer)
+	if f, err := assets.Open("assets/player/player.png"); err == nil {
+		if img, _, err := image.Decode(f); err == nil {
+			g.playerImg = ebiten.NewImageFromImage(img)
+		}
+		f.Close()
+	}
+	if g.playerImg == nil {
+		g.playerImg = ebiten.NewImage(PlayerSize, PlayerSize)
+		g.playerImg.Fill(colorPlayer)
+	}
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.enemyImg.Fill(colorEnemy)
 
@@ -148,12 +156,12 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 	// Spawn 0-2 potions per room at random offsets from the center
 	g.potions = g.potions[:0]
 	for _, room := range d.Rooms {
-		count := rng.Intn(3) // 0, 1, or 2
+		count := g.rng.Intn(3) // 0, 1, or 2
 		for n := 0; n < count; n++ {
 			cx, cy := room.Center()
 			// Random offset within the room, avoiding the exact center (enemy/player tile)
-			ox := rng.Intn(room.W) - room.W/2
-			oy := rng.Intn(room.H) - room.H/2
+			ox := g.rng.Intn(room.W) - room.W/2
+			oy := g.rng.Intn(room.H) - room.H/2
 			if ox == 0 && oy == 0 {
 				ox = 1
 			}
@@ -459,6 +467,8 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
 	playerPy := float64(g.player.Y*TileSize) + offsetY + float64(TileSize-PlayerSize)/2
 	op.GeoM.Reset()
+	iw, ih := g.playerImg.Bounds().Dx(), g.playerImg.Bounds().Dy()
+	op.GeoM.Scale(float64(PlayerSize)/float64(iw), float64(PlayerSize)/float64(ih))
 	op.GeoM.Translate(playerPx, playerPy)
 	screen.DrawImage(g.playerImg, &op)
 

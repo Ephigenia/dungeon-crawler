@@ -1,7 +1,11 @@
 .PHONY: install run build
 
+GO			:= $(shell which go)
+
 install:
-	go mod download
+	@$(GO) version
+	@$(GO) mod download
+	@$(GO) mod tidy
 
 run:
 	go run .
