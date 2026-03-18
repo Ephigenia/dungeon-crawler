@@ -1,3 +1,5 @@
+combine hack+slash / roquelike / rpg
+
 # Dungeon Crawler
 
 A 2D dungeon crawler written in Go using [Ebitengine](https://ebitengine.org/). Levels are **procedurally generated** with a rooms-and-corridors algorithm: random rectangular rooms are placed and connected by L-shaped corridors.
@@ -26,20 +28,16 @@ The camera follows the player; the dungeon is larger than the screen so you expl
 
 ## Ideas
 
-- asset and item / player assignment abstraction
-- -asset abstraction with images and offsets
-- asset abstraction with animations
-- 
+- asset management
+  - and item / player assignment abstraction
+  - asset abstraction with images and offsets
+  - asset abstraction with animations
 - items require a certain level or stats to be able to equipped
 - list of slots an item can be equipped on should be an array so that items can be equipped on left or right hand 
 - quick belt
   - additional item
-- pickup items with key?
 - drop items with key?
 - diablo like
   - attributes influence weapons
   - different attack modes
-- add image reader with offsets
-- images with animations
-- load assets in main instead of in game.go
 - highlight items in teh iventory list when a item equipment slot is selected
