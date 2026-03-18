@@ -112,11 +112,49 @@ func New(assets fs.FS) *Game {
 		{"assets/items/health_potion_small.png", ItemSmallHealthPotion},
 		{"assets/items/health_potion_medium.png", ItemMediumHealthPotion},
 		{"assets/items/health_potion_large.png", ItemLargeHealthPotion},
-		{"assets/items/apple.png", ItemApple},
-		{"assets/items/bread_roll.png", ItemBreadRoll},
-		{"assets/items/mushroom.png", ItemMushroom},
-		{"assets/items/meat.png", ItemMeat},
-		{"assets/items/grapes.png", ItemGrapes},
+		{"assets/items/food/apple.png", ItemApple},
+		{"assets/items/food/bread_roll.png", ItemBreadRoll},
+		{"assets/items/food/egg_fried.png", ItemFriedEgg},
+		{"assets/items/food/grapes.png", ItemGrapes},
+		{"assets/items/food/meat.png", ItemMeat},
+		{"assets/items/food/mushroom.png", ItemMushroom},
+		{"assets/items/food/pizza_slice.png", ItemPizzaSlice},
+		// items
+		{"assets/items/accessories/necklace_skull.png", ItemNecklaceSkull},
+		{"assets/items/accessories/necklace_diamond.png", ItemNecklaceDiamond},
+		{"assets/items/accessories/necklace_star.png", ItemNecklaceStar},
+		{"assets/items/accessories/necklace_tooth.png", ItemNecklaceTooth},
+		// items // rings
+		{"assets/items/accessories/ring_gold.png", ItemGoldRing},
+		{"assets/items/accessories/ring_silver.png", ItemSilverRing},
+		{"assets/items/accessories/ring_diamond.png", ItemDiamondRing},
+		{"assets/items/accessories/ring_diamond2.png", ItemDiamondRing2},
+		// items // gear // gloves
+		{"assets/items/accessories/gloves_finger.png", ItemGlovesFinger},
+		{"assets/items/accessories/gloves_leather.png", ItemGlovesLeather},
+		{"assets/items/accessories/gloves_leather_metal.png", ItemGlovesLeatherMetal},
+		{"assets/items/accessories/gloves_metal.png", ItemGlovesMetal},
+		// items // gear // head
+		{"assets/items/gear/head/basic_helmet.png", ItemBasicHelmet},
+		{"assets/items/gear/head/full_helmet.png", ItemFullHelmet},
+		{"assets/items/gear/head/gold_helmet.png", ItemGoldHelmet},
+		{"assets/items/gear/head/horn_helmet.png", ItemHornHelmet},
+		{"assets/items/gear/head/coif.png", ItemCoif},
+		// items // gear // shoes
+		{"assets/items/gear/shoes/shoes_simple.png", ItemSimpleShoes},
+		{"assets/items/gear/shoes/shoes_leather.png", ItemLeatherShoes},
+		{"assets/items/gear/shoes/shoes_metal.png", ItemMetalShoes},
+		{"assets/items/gear/shoes/shoes_gold.png", ItemGoldShoes},
+		// items // gear // shield
+		{"assets/items/gear/shield/wooden_shield.png", ItemWoodenShield},
+		{"assets/items/gear/shield/bronze_shield.png", ItemBronzeShield},
+		{"assets/items/gear/shield/metal_shield.png", ItemMetalShield},
+		{"assets/items/gear/shield/gold_shield.png", ItemGoldShield},
+		// items // gear // armor
+		{"assets/items/gear/armor/basic.png", ItemBasicArmor},
+		{"assets/items/gear/armor/complex.png", ItemComplexArmor},
+		{"assets/items/gear/armor/bronze.png", ItemBronzeArmor},
+		{"assets/items/gear/armor/gold.png", ItemGoldArmor},
 	} {
 		if f, err := assets.Open(entry.path); err == nil {
 			if img, _, err := image.Decode(f); err == nil {

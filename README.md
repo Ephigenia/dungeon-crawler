@@ -26,6 +26,10 @@ The camera follows the player; the dungeon is larger than the screen so you expl
 
 ## Ideas
 
+- items require a certain level or stats to be able to equipped
+- list of slots an item can be equipped on should be an array so that items can be equipped on left or right hand 
+- quick belt
+  - additional item
 - pickup items with key?
 - drop items with key?
 - diablo like
