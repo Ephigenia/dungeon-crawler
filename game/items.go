@@ -189,17 +189,17 @@ var (
 
 	// Backpacks
 	ItemSmallBackpack = &Item{
-		ID: "small_backpack", Weight: 1.0, Category: CategoryBackpack, Slots: []EquipmentSlot{SlotBackpack},
+		ID: "small_backpack", Weight: 1.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotBackpack},
 		Color: color.RGBA{180, 138, 88, 255}, ImagePath: "assets/items/gear/backpack/basic.png",
 		Effect: "+10 slots, +5 kg", StatMods: StatModifiers{InvSlots: 10, InvWeight: 5.0},
 	}
 	ItemMediumBackpack = &Item{
-		ID: "medium_backpack", Weight: 1.5, Category: CategoryBackpack, Slots: []EquipmentSlot{SlotBackpack},
+		ID: "medium_backpack", Weight: 1.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotBackpack},
 		Color: color.RGBA{158, 112, 68, 255}, ImagePath: "assets/items/gear/backpack/medium.png",
 		Effect: "+15 slots, +7 kg", StatMods: StatModifiers{InvSlots: 15, InvWeight: 7.0},
 	}
 	ItemLargeBackpack = &Item{
-		ID: "large_backpack", Weight: 2.0, Category: CategoryBackpack, Slots: []EquipmentSlot{SlotBackpack},
+		ID: "large_backpack", Weight: 2.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotBackpack},
 		Color: color.RGBA{138, 92, 50, 255}, ImagePath: "assets/items/gear/backpack/large.png",
 		Effect: "+15 slots, +20 kg", StatMods: StatModifiers{InvSlots: 15, InvWeight: 20.0},
 	}

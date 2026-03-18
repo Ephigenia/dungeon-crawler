@@ -15,7 +15,6 @@ const (
 	CategoryEquipment  ItemCategory = "equipment"
 	CategoryKeyItem    ItemCategory = "key-item"
 	CategoryOther      ItemCategory = "other"
-	CategoryBackpack   ItemCategory = "backpack"
 )
 
 // Item describes a single type of item.

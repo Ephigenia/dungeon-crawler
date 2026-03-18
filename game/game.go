@@ -339,7 +339,7 @@ func (g *Game) updateInventoryItems() {
 					g.inventoryCursor--
 				}
 			}
-		case CategoryEquipment, CategoryBackpack:
+		case CategoryEquipment:
 			if g.player.IsEquipped(item) {
 				// Toggle off: find the slot and unequip
 				for _, slot := range EquipmentSlotOrder {
@@ -752,7 +752,7 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 			switch selectedItem.Category {
 			case CategoryConsumable:
 				text.Draw(screen, "[U/Enter] Use    [X] Destroy", g.hudFont, gridX, dy, yellow)
-			case CategoryEquipment, CategoryBackpack:
+			case CategoryEquipment:
 				if g.player.IsEquipped(selectedItem) {
 					text.Draw(screen, "[U/Enter] Unequip", g.hudFont, gridX, dy, yellow)
 				} else {

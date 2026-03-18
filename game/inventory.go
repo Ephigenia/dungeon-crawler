@@ -24,12 +24,12 @@ func (inv *Inventory) CurrentWeight() float64 {
 }
 
 // CanAdd reports whether item can be added without exceeding limits.
-// Backpacks that increase weight capacity bypass the weight check.
+// Items that go in the backpack slot (which expand capacity) bypass the weight check.
 func (inv *Inventory) CanAdd(item *Item) bool {
 	if len(inv.Items) >= inv.MaxItems {
 		return false
 	}
-	if item.Category == CategoryBackpack && item.StatMods.InvWeight > 0 {
+	if item.FitsSlot(SlotBackpack) && item.StatMods.InvWeight > 0 {
 		return true
 	}
 	return inv.CurrentWeight()+item.Weight <= inv.MaxWeight
