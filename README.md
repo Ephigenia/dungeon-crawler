@@ -1,48 +1,90 @@
-combine hack+slash / roquelike / rpg
-
 # Dungeon Crawler
 
-A 2D dungeon crawler written in Go using [Ebitengine](https://ebitengine.org/). Levels are **procedurally generated** with a rooms-and-corridors algorithm: random rectangular rooms are placed and connected by L-shaped corridors.
+A 2D dungeon crawler written in Go using [Ebitengine](https://ebitengine.org/). Combines hack-and-slash combat with roguelike dungeon generation and RPG inventory/equipment systems.
+
+Levels are **procedurally generated** with a rooms-and-corridors algorithm: random rectangular rooms are placed and connected by L-shaped corridors.
 
 ## Run
 
 ```bash
+make run
+# or
 go run .
 # or
-go build -o dungeon-crawler . && ./dungeon-crawler
+make build && ./dungeon-crawler
 ```
 
 ## Controls
 
-- **WASD** or **Arrow keys** – move (one tile per keypress)
-- **R** – generate a new dungeon
+### Movement
+| Key | Action |
+|-----|--------|
+| `WASD` / Arrow keys | Move one tile |
+| `R` | Generate a new dungeon |
 
-## Structure
+### World
+| Key | Action |
+|-----|--------|
+| `P` | Pick up item at current position |
+| `Q` | Quit |
 
-- `main.go` – entry point, window setup
-- `game/` – game loop, player, camera, rendering
-- `dungeon/` – procedural dungeon generation (rooms + corridors)
+### Inventory (`I` to open/close)
+| Key | Action |
+|-----|--------|
+| `Tab` | Switch focus between item grid and equipment slots |
+| `WASD` / Arrow keys | Navigate |
+| `U` / `Enter` | Use (consumable) or Equip/Unequip (equipment) |
+| `X` | Destroy item (cannot destroy equipped items) |
 
-The camera follows the player; the dungeon is larger than the screen so you explore by moving.
+## Gameplay
 
+- **Combat** – bump into an enemy to attack; enemies retaliate immediately
+- **Leveling** – earn EXP from hits and kills; leveling up improves HP, carry weight, and inventory slots
+- **Pickups** – items are scattered across rooms; walk over them and press `P` to pick up
+- **Equipment** – items stay in inventory when equipped (shown with a gold border); multiple slots supported (e.g. rings, weapons fit either hand)
+- **Backpacks** – equipping a backpack increases maximum carry weight and inventory slots
+
+## Items
+
+| Category | Examples |
+|----------|---------|
+| Consumables | Health potions (small/medium/large), food (apple, bread, meat, pizza…) |
+| Weapons | Iron sword |
+| Armor | Basic, bronze, complex, gold |
+| Shields | Wooden, metal, gold, bronze |
+| Helmets | Coif, basic, full, horn, gold |
+| Gloves | Leather, finger, leather-metal, metal |
+| Shoes | Simple, leather, metal, gold |
+| Accessories | Necklaces (skull, diamond, star, tooth), rings (gold, silver, diamond) |
+| Backpacks | Small, medium, large |
+
+## Code Structure
+
+```
+main.go                  – entry point, window setup, embedded assets
+dungeon/                 – procedural dungeon generation (rooms + corridors)
+game/
+  game.go                – Game struct, constants, Layout()
+  game_init.go           – New(), resetEntities(), Regenerate(), potionAt(), enemyAt()
+  input.go               – Update(), combat resolution, inventory input handlers
+  render.go              – Draw(), HUD, world rendering, shared draw helpers
+  render_inventory.go    – inventory overlay and detail panel
+  player.go              – Player struct, leveling, equip/unequip, stat modifiers
+  enemy.go               – Enemy struct, damage, spawn table
+  inventory.go           – Inventory weight/slot management
+  equipment.go           – Equipment slots, StatModifiers, slot labels
+  item.go                – Item struct, ItemCategory constants
+  items.go               – All item definitions, AllItems, SpawnableItems
+  item_images.go         – Sprite loading from embedded FS
+  potion.go              – Map pickup entity (holds any Item)
+```
 
 ## Ideas
 
-- left & right hand cannot have 2 shields
-- enemy show their HP
-- game
-  - enemy variants
-  - 
-- asset management
-  - and item / player assignment abstraction
-  - asset abstraction with images and offsets
-  - asset abstraction with animations
-- items require a certain level or stats to be able to equipped
-- list of slots an item can be equipped on should be an array so that items can be equipped on left or right hand 
-- quick belt
-  - additional item
-- drop items with key?
-- diablo like
-  - attributes influence weapons
-  - different attack modes
-- highlight items in teh iventory list when a item equipment slot is selected
+- Quick-access belt (hotbar)
+- Drop items onto the map
+- Level/stat requirements for equipping items
+- Attribute system influencing weapon damage (Diablo-style)
+- Item highlighting in inventory when a compatible equipment slot is selected
+- Enemy variants with unique abilities
+- Animated sprites and asset abstraction layer
