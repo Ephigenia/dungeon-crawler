@@ -46,6 +46,7 @@ type Game struct {
 	holdFramesUp, holdFramesDown, holdFramesLeft, holdFramesRight int
 
 	potions []*Potion
+	rng     *rand.Rand
 
 	inventoryOpen   bool
 	inventoryFocus  bool // true = item grid, false = equipment slots
@@ -65,7 +66,7 @@ type Game struct {
 func New(assets fs.FS) *Game {
 	cfg := dungeon.DefaultConfig()
 	d := dungeon.Generate(cfg)
-	g := &Game{dungeon: d}
+	g := &Game{dungeon: d, rng: rand.New(rand.NewSource(rand.Int63()))}
 
 	// Load HUD font
 	fontData, err := fs.ReadFile(assets, "assets/Gorgeous-Pixel/GorgeousPixel.ttf")
@@ -137,13 +138,11 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 	g.cameraX = float64(startX * TileSize)
 	g.cameraY = float64(startY * TileSize)
 
-	rng := rand.New(rand.NewSource(rand.Int63()))
-
 	g.enemies = g.enemies[:0]
 	// Spawn one enemy per room, skipping the starting room
 	for i := 1; i < len(d.Rooms); i++ {
 		ex, ey := d.Rooms[i].Center()
-		g.enemies = append(g.enemies, spawnEnemy(ex, ey, rng))
+		g.enemies = append(g.enemies, spawnEnemy(ex, ey, g.rng))
 	}
 
 	// Spawn 0-2 potions per room at random offsets from the center
@@ -160,7 +159,7 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 			}
 			px, py := cx+ox, cy+oy
 			if d.IsWalkable(px, py) {
-				g.potions = append(g.potions, newPotion(px, py, rng))
+				g.potions = append(g.potions, newPotion(px, py, g.rng))
 			}
 		}
 	}
@@ -257,6 +256,11 @@ func (g *Game) Update() error {
 				g.player.TakeDamage(e.Attack)
 			} else {
 				g.player.AddEXP(20)
+				dropChance := 10 + (g.player.Level - 1)
+				if g.rng.Intn(100) < dropChance {
+					drop := newPotion(e.X, e.Y, g.rng)
+					g.potions = append(g.potions, drop)
+				}
 			}
 		} else if g.dungeon.IsWalkable(nx, ny) {
 			g.player.X, g.player.Y = nx, ny
@@ -444,6 +448,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	// HUD: player stats
 	inv := g.player.Inventory
 	text.Draw(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 4, 14, color.White)
+	const hpBarX, hpBarY, hpBarW, hpBarH = 4, 17, 80, 4
+	vector.DrawFilledRect(screen, hpBarX, hpBarY, hpBarW, hpBarH, color.RGBA{50, 20, 20, 220}, false)
+	hpFill := float32(hpBarW) * float32(g.player.HP) / float32(g.player.MaxHP)
+	vector.DrawFilledRect(screen, hpBarX, hpBarY, hpFill, hpBarH, color.RGBA{200, 60, 60, 255}, false)
 	text.Draw(screen, fmt.Sprintf("LVL: %d  EXP: %d / %d", g.player.Level, g.player.EXP, g.player.NextLevelEXP), g.hudFont, 4, 28, color.White)
 	text.Draw(screen, fmt.Sprintf("INV: %d / %d items  %.2f / %.2f kg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight), g.hudFont, 4, 42, color.White)
 
