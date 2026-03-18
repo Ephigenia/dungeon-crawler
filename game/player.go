@@ -42,49 +42,50 @@ func (p *Player) applyStatMods(mods StatModifiers, sign int) {
 	p.Inventory.MaxWeight += float64(sign) * mods.InvWeight
 }
 
-// Equip moves the item at invIdx from inventory into its designated equipment slot.
-// If the slot is already occupied the old item is swapped back to inventory.
+// IsEquipped reports whether item is currently equipped in any slot.
+func (p *Player) IsEquipped(item *Item) bool {
+	for _, equipped := range p.Equipment.Slots {
+		if equipped == item {
+			return true
+		}
+	}
+	return false
+}
+
+// Equip marks the item at invIdx as equipped. The item stays in inventory.
+// Among compatible slots an empty one is preferred; otherwise the first slot
+// is used and its previous occupant is simply unmarked.
 func (p *Player) Equip(invIdx int) bool {
 	inv := p.Inventory
 	if invIdx >= len(inv.Items) {
 		return false
 	}
 	item := inv.Items[invIdx]
-	if item.Slot == "" {
+	if len(item.Slots) == 0 {
 		return false
 	}
-	old := p.Equipment.Slots[item.Slot]
-	if old != nil {
-		// After removing the new item, check if old item fits weight-wise.
-		weightAfter := inv.CurrentWeight() - item.Weight + old.Weight
-		if weightAfter > inv.MaxWeight {
-			return false
+	// Prefer an empty slot; fall back to the first candidate.
+	target := item.Slots[0]
+	for _, s := range item.Slots {
+		if p.Equipment.Slots[s] == nil {
+			target = s
+			break
 		}
 	}
-	inv.Remove(invIdx)
-	if old != nil {
-		inv.Items = append(inv.Items, old)
+	if old := p.Equipment.Slots[target]; old != nil {
 		p.applyStatMods(old.StatMods, -1)
 	}
-	p.Equipment.Slots[item.Slot] = item
+	p.Equipment.Slots[target] = item
 	p.applyStatMods(item.StatMods, 1)
 	return true
 }
 
-// Unequip moves the item in the given slot back to inventory.
+// Unequip removes the item from the given slot. The item stays in inventory.
 func (p *Player) Unequip(slot EquipmentSlot) bool {
 	item := p.Equipment.Slots[slot]
 	if item == nil {
 		return false
 	}
-	inv := p.Inventory
-	// After removing capacity bonuses, verify the inventory stays valid.
-	newMaxItems := inv.MaxItems - item.StatMods.InvSlots
-	newMaxWeight := inv.MaxWeight - item.StatMods.InvWeight
-	if len(inv.Items)+1 > newMaxItems || inv.CurrentWeight()+item.Weight > newMaxWeight {
-		return false
-	}
-	inv.Add(item)
 	p.applyStatMods(item.StatMods, -1)
 	p.Equipment.Slots[slot] = nil
 	return true

@@ -38,3 +38,4 @@ The camera follows the player; the dungeon is larger than the screen so you expl
 - add image reader with offsets
 - images with animations
 - load assets in main instead of in game.go
+- highlight items in teh iventory list when a item equipment slot is selected

@@ -120,13 +120,19 @@ func New(assets fs.FS) *Game {
 		{"assets/items/food/meat.png", ItemMeat},
 		{"assets/items/food/mushroom.png", ItemMushroom},
 		{"assets/items/food/pizza_slice.png", ItemPizzaSlice},
+		// items // gear // backpack
+		{"assets/items/gear/backpack/basic.png", ItemSmallBackpack},
+		{"assets/items/gear/backpack/medium.png", ItemMediumBackpack},
+		{"assets/items/gear/backpack/large.png", ItemLargeBackpack},
+		// items // gear // legs
+		{"assets/items/gear/legs/pants.png", ItemPants},
 		// items // accessories
 		{"assets/items/accessories/necklace_diamond.png", ItemNecklaceDiamond},
 		{"assets/items/accessories/necklace_skull.png", ItemNecklaceSkull},
 		{"assets/items/accessories/necklace_star.png", ItemNecklaceStar},
 		{"assets/items/accessories/necklace_tooth.png", ItemNecklaceTooth},
 		{"assets/items/accessories/ring_diamond.png", ItemDiamondRing},
-		{"assets/items/accessories/ring_diamond2.png", ItemDiamondRing2},
+		{"assets/items/accessories/ring_diamond_2.png", ItemDiamondRing2},
 		{"assets/items/accessories/ring_gold.png", ItemGoldRing},
 		{"assets/items/accessories/ring_silver.png", ItemSilverRing},
 		// items // gear // gloves
@@ -146,15 +152,13 @@ func New(assets fs.FS) *Game {
 		{"assets/items/gear/shoes/shoes_metal.png", ItemMetalShoes},
 		{"assets/items/gear/shoes/shoes_simple.png", ItemSimpleShoes},
 		// items // gear // shield
-		{"assets/items/gear/shield/bronze_shield.png", ItemBronzeShield},
-		{"assets/items/gear/shield/gold_shield.png", ItemGoldShield},
-		{"assets/items/gear/shield/metal_shield.png", ItemMetalShield},
-		{"assets/items/gear/shield/wooden_shield.png", ItemWoodenShield},
+		{"assets/items/shield/shield_metal.png", ItemMetalShield},
+		{"assets/items/shield/shield_wood.png", ItemWoodenShield},
 		// items // gear // armor
-		{"assets/items/gear/armor/basic.png", ItemBasicArmor},
-		{"assets/items/gear/armor/bronze.png", ItemBronzeArmor},
-		{"assets/items/gear/armor/complex.png", ItemComplexArmor},
-		{"assets/items/gear/armor/gold.png", ItemGoldArmor},
+		{"assets/items/armor/basic.png", ItemBasicArmor},
+		{"assets/items/armor/bronze.png", ItemBronzeArmor},
+		{"assets/items/armor/complex.png", ItemComplexArmor},
+		{"assets/items/armor/gold.png", ItemGoldArmor},
 	} {
 		if f, err := assets.Open(entry.path); err == nil {
 			if img, _, err := image.Decode(f); err == nil {
@@ -194,7 +198,7 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 	// Spawn 0-2 potions per room at random offsets from the center
 	g.potions = g.potions[:0]
 	for _, room := range d.Rooms {
-		count := g.rng.Intn(3) // 0, 1, or 2
+		count := g.rng.Intn(4) + 1 // 1, 2, 3, or 4
 		for n := 0; n < count; n++ {
 			cx, cy := room.Center()
 			// Random offset within the room, avoiding the exact center (enemy/player tile)
@@ -375,19 +379,28 @@ func (g *Game) updateInventoryItems() {
 					g.inventoryCursor--
 				}
 			}
-		case CategoryEquipment:
-			if g.player.Equip(g.inventoryCursor) {
-				if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
-					g.inventoryCursor--
+		case CategoryEquipment, CategoryBackpack:
+			if g.player.IsEquipped(item) {
+				// Toggle off: find the slot and unequip
+				for _, slot := range EquipmentSlotOrder {
+					if g.player.Equipment.Slots[slot] == item {
+						g.player.Unequip(slot)
+						break
+					}
 				}
+			} else {
+				g.player.Equip(g.inventoryCursor)
 			}
 		}
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) && g.inventoryCursor < len(inv.Items) {
-		inv.Remove(g.inventoryCursor)
-		if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
-			g.inventoryCursor--
+		item := inv.Items[g.inventoryCursor]
+		if !g.player.IsEquipped(item) {
+			inv.Remove(g.inventoryCursor)
+			if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
+				g.inventoryCursor--
+			}
 		}
 	}
 }
@@ -493,13 +506,34 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	// HUD: player stats
 	inv := g.player.Inventory
-	text.Draw(screen, fmt.Sprintf("HP: %d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 4, 14, color.White)
-	const hpBarX, hpBarY, hpBarW, hpBarH = 4, 17, 80, 4
-	vector.DrawFilledRect(screen, hpBarX, hpBarY, hpBarW, hpBarH, color.RGBA{50, 20, 20, 220}, false)
-	hpFill := float32(hpBarW) * float32(g.player.HP) / float32(g.player.MaxHP)
-	vector.DrawFilledRect(screen, hpBarX, hpBarY, hpFill, hpBarH, color.RGBA{200, 60, 60, 255}, false)
-	text.Draw(screen, fmt.Sprintf("LVL: %d  EXP: %d / %d", g.player.Level, g.player.EXP, g.player.NextLevelEXP), g.hudFont, 4, 28, color.White)
-	text.Draw(screen, fmt.Sprintf("INV: %d / %d items  %.2f / %.2f kg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight), g.hudFont, 4, 42, color.White)
+	hudDim := color.RGBA{160, 160, 160, 255}
+	hudY := 14
+
+	text.Draw(screen, "HP", g.hudFont, 4, hudY, hudDim)
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 32, hudY, color.White)
+	vector.DrawFilledRect(screen, 94, float32(hudY-9), 80, 4, color.RGBA{50, 20, 20, 220}, false)
+	vector.DrawFilledRect(screen, 94, float32(hudY-9), 80*float32(g.player.HP)/float32(g.player.MaxHP), 4, color.RGBA{200, 60, 60, 255}, false)
+	hudY += 12
+
+	text.Draw(screen, "ATK", g.hudFont, 4, hudY, hudDim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Attack), g.hudFont, 32, hudY, color.RGBA{224, 180, 100, 255})
+	hudY += 12
+
+	text.Draw(screen, "DEF", g.hudFont, 4, hudY, hudDim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Defense), g.hudFont, 32, hudY, color.RGBA{100, 160, 220, 255})
+	hudY += 12
+
+	text.Draw(screen, "LVL", g.hudFont, 4, hudY, hudDim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Level), g.hudFont, 32, hudY, color.White)
+	hudY += 12
+
+	text.Draw(screen, "EXP", g.hudFont, 4, hudY, hudDim)
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.EXP, g.player.NextLevelEXP), g.hudFont, 32, hudY, color.White)
+	vector.DrawFilledRect(screen, 94, float32(hudY-9), 80, 4, color.RGBA{20, 30, 50, 220}, false)
+	vector.DrawFilledRect(screen, 94, float32(hudY-9), 80*float32(g.player.EXP)/float32(g.player.NextLevelEXP), 4, color.RGBA{100, 160, 240, 255}, false)
+	hudY += 12
+
+	text.Draw(screen, fmt.Sprintf("INV: %d / %d items  %.2f / %.2f kg", len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight), g.hudFont, 4, hudY, hudDim)
 
 	// Draw player
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
@@ -599,6 +633,9 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 				}
 			}
 			borderCol := color.RGBA{80, 88, 108, 255}
+			if idx < len(inv.Items) && g.player.IsEquipped(inv.Items[idx]) {
+				borderCol = color.RGBA{220, 200, 60, 255}
+			}
 			if selected {
 				borderCol = color.RGBA{180, 200, 255, 255}
 			}
@@ -608,6 +645,35 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 			vector.DrawFilledRect(screen, sx+slotSize-1, sy, 1, slotSize, borderCol, false)
 		}
 	}
+
+	// --- Character stats (below item grid) ---
+	statsY := gridY + rows*slotStride + 16
+	vector.DrawFilledRect(screen, float32(gridX), float32(statsY-7), float32(dividerX-gridX-12), 1, border, false)
+	text.Draw(screen, "CHARACTER", g.hudFont, gridX, statsY+2, dim)
+	statsY += 16
+
+	text.Draw(screen, "HP", g.hudFont, gridX, statsY, dim)
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.HP, g.player.MaxHP), g.hudFont, gridX+28, statsY, white)
+	vector.DrawFilledRect(screen, float32(gridX+90), float32(statsY-9), 80, 4, color.RGBA{50, 20, 20, 220}, false)
+	vector.DrawFilledRect(screen, float32(gridX+90), float32(statsY-9), 80*float32(g.player.HP)/float32(g.player.MaxHP), 4, color.RGBA{200, 60, 60, 255}, false)
+	statsY += 12
+
+	text.Draw(screen, "ATK", g.hudFont, gridX, statsY, dim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Attack), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
+	statsY += 12
+
+	text.Draw(screen, "DEF", g.hudFont, gridX, statsY, dim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Defense), g.hudFont, gridX+28, statsY, color.RGBA{100, 160, 220, 255})
+	statsY += 12
+
+	text.Draw(screen, "LVL", g.hudFont, gridX, statsY, dim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Level), g.hudFont, gridX+28, statsY, white)
+	statsY += 12
+
+	text.Draw(screen, "EXP", g.hudFont, gridX, statsY, dim)
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.EXP, g.player.NextLevelEXP), g.hudFont, gridX+28, statsY, white)
+	vector.DrawFilledRect(screen, float32(gridX+90), float32(statsY-9), 80, 4, color.RGBA{20, 30, 50, 220}, false)
+	vector.DrawFilledRect(screen, float32(gridX+90), float32(statsY-9), 80*float32(g.player.EXP)/float32(g.player.NextLevelEXP), 4, color.RGBA{100, 160, 240, 255}, false)
 
 	// --- Equipment slot list ---
 	// columns: label | swatch | name | weight | effect
@@ -695,8 +761,12 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 			switch selectedItem.Category {
 			case CategoryConsumable:
 				text.Draw(screen, "[U/Enter] Use    [X] Destroy", g.hudFont, gridX, dy, yellow)
-			case CategoryEquipment:
-				text.Draw(screen, "[U/Enter] Equip  [X] Destroy", g.hudFont, gridX, dy, yellow)
+			case CategoryEquipment, CategoryBackpack:
+				if g.player.IsEquipped(selectedItem) {
+					text.Draw(screen, "[U/Enter] Unequip", g.hudFont, gridX, dy, yellow)
+				} else {
+					text.Draw(screen, "[U/Enter] Equip  [X] Destroy", g.hudFont, gridX, dy, yellow)
+				}
 			default:
 				text.Draw(screen, "[X] Destroy", g.hudFont, gridX, dy, red)
 			}

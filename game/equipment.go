@@ -46,9 +46,9 @@ func slotLabel(s EquipmentSlot) string {
 	case SlotRightRing:
 		return "R.RING"
 	case SlotLeftWeapon:
-		return "L.WEAP"
+		return "L.WPN"
 	case SlotRightWeapon:
-		return "R.WEAP"
+		return "R.WPN"
 	case SlotBackpack:
 		return "BACKPCK"
 	}
