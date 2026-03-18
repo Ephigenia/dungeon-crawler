@@ -28,6 +28,11 @@ The camera follows the player; the dungeon is larger than the screen so you expl
 
 ## Ideas
 
+- left & right hand cannot have 2 shields
+- enemy show their HP
+- game
+  - enemy variants
+  - 
 - asset management
   - and item / player assignment abstraction
   - asset abstraction with images and offsets
