@@ -138,7 +138,7 @@ func (g *Game) updateInventoryItems() {
 	inv := g.player.Inventory
 	maxSlots := inv.MaxItems
 
-	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) || inpututil.IsKeyJustPressed(ebiten.KeyD) {
+	if inpututil.IsKeyJustPressed(ebiten.KeyArrowRight) {
 		if g.inventoryCursor < maxSlots-1 {
 			g.inventoryCursor++
 		}
@@ -187,6 +187,17 @@ func (g *Game) updateInventoryItems() {
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) && g.inventoryCursor < len(inv.Items) {
 		item := inv.Items[g.inventoryCursor].Item
 		if !g.player.IsEquipped(item) {
+			inv.Consume(g.inventoryCursor)
+			if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
+				g.inventoryCursor--
+			}
+		}
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyD) && g.inventoryCursor < len(inv.Items) {
+		item := inv.Items[g.inventoryCursor].Item
+		if !g.player.IsEquipped(item) {
+			g.potions = append(g.potions, &Potion{X: g.player.X, Y: g.player.Y, Item: item})
 			inv.Consume(g.inventoryCursor)
 			if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 				g.inventoryCursor--

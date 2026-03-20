@@ -160,7 +160,7 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	g.drawInventoryDetail(screen, inv, gridX, detailY, white, dim, green, yellow, red)
 
 	// Controls hint
-	text.Draw(screen, "[Tab] Switch   [Arrows/WASD] Navigate   [U/Enter] Action   [X] Destroy   [I] Close",
+	text.Draw(screen, "[Tab] Switch   [Arrows/WASD] Navigate   [U/Enter] Action   [D] Drop   [X] Destroy   [I] Close",
 		g.hudFont, panelX+6, panelY+panelH-10, color.RGBA{100, 100, 100, 255})
 }
 
@@ -229,14 +229,14 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 	}
 	switch selectedItem.Category {
 	case CategoryConsumable:
-		text.Draw(screen, "[U/Enter] Use    [X] Destroy", g.hudFont, x, dy, yellow)
+		text.Draw(screen, "[U/Enter] Use    [D] Drop    [X] Destroy", g.hudFont, x, dy, yellow)
 	case CategoryEquipment:
 		if g.player.IsEquipped(selectedItem) {
 			text.Draw(screen, "[U/Enter] Unequip", g.hudFont, x, dy, yellow)
 		} else {
-			text.Draw(screen, "[U/Enter] Equip  [X] Destroy", g.hudFont, x, dy, yellow)
+			text.Draw(screen, "[U/Enter] Equip  [D] Drop   [X] Destroy", g.hudFont, x, dy, yellow)
 		}
 	default:
-		text.Draw(screen, "[X] Destroy", g.hudFont, x, dy, red)
+		text.Draw(screen, "[D] Drop    [X] Destroy", g.hudFont, x, dy, red)
 	}
 }
