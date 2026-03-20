@@ -77,8 +77,13 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 
 			borderCol := color.RGBA{80, 88, 108, 255}
 			if idx < len(inv.Items) {
-				item := inv.Items[idx]
+				slot := inv.Items[idx]
+				item := slot.Item
 				drawItemSprite(screen, item, sx, sy, slotSize, 2)
+				if slot.Count > 1 {
+					countStr := fmt.Sprintf("%d", slot.Count)
+					text.Draw(screen, countStr, g.hudFont, int(sx)+slotSize-len(countStr)*4, int(sy)+slotSize-1, color.RGBA{255, 255, 200, 255})
+				}
 				if g.player.IsEquipped(item) {
 					borderCol = color.RGBA{220, 200, 60, 255}
 				}
@@ -164,10 +169,12 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 	white, dim, green, yellow, red color.RGBA) {
 
 	var selectedItem *Item
+	var selectedSlot *InventorySlot
 	var fromEquipment bool
 	if g.inventoryFocus {
 		if g.inventoryCursor < len(inv.Items) {
-			selectedItem = inv.Items[g.inventoryCursor]
+			selectedSlot = inv.Items[g.inventoryCursor]
+			selectedItem = selectedSlot.Item
 		}
 	} else {
 		slot := EquipmentSlotOrder[g.equipmentCursor]
@@ -185,7 +192,11 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 		return
 	}
 
-	text.Draw(screen, selectedItem.ID, g.hudFont, x, dy, white)
+	itemName := selectedItem.ID
+	if selectedSlot != nil && selectedSlot.Count > 1 {
+		itemName = fmt.Sprintf("%s  x%d", selectedItem.ID, selectedSlot.Count)
+	}
+	text.Draw(screen, itemName, g.hudFont, x, dy, white)
 	dy += 16
 	text.Draw(screen, fmt.Sprintf("Type: %s   Weight: %.1f kg", selectedItem.Category, selectedItem.Weight),
 		g.hudFont, x, dy, dim)

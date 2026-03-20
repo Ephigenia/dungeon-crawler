@@ -60,7 +60,7 @@ func (p *Player) Equip(invIdx int) bool {
 	if invIdx >= len(inv.Items) {
 		return false
 	}
-	item := inv.Items[invIdx]
+	item := inv.Items[invIdx].Item
 	if len(item.Slots) == 0 {
 		return false
 	}

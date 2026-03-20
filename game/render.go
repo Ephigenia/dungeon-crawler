@@ -17,7 +17,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawCombatNotification(screen)
 
 	if p := g.potionAt(g.player.X, g.player.Y); p != nil {
-		text.Draw(screen, p.Item.ID, g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
+		text.Draw(screen, fmt.Sprintf("%s  [P] Pick up", p.Item.ID), g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
 	}
 	if g.inventoryOpen {
 		g.drawInventory(screen)

@@ -83,6 +83,7 @@ game/
 
 - Quick-access belt (hotbar)
 - Drop items onto the map
+- stackable items
 - Level/stat requirements for equipping items
 - Attribute system influencing weapon damage (Diablo-style)
 - Item highlighting in inventory when a compatible equipment slot is selected

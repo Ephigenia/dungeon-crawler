@@ -161,11 +161,11 @@ func (g *Game) updateInventoryItems() {
 
 	usePressed := inpututil.IsKeyJustPressed(ebiten.KeyU) || inpututil.IsKeyJustPressed(ebiten.KeyEnter)
 	if usePressed && g.inventoryCursor < len(inv.Items) {
-		item := inv.Items[g.inventoryCursor]
+		item := inv.Items[g.inventoryCursor].Item
 		switch item.Category {
 		case CategoryConsumable:
 			if item.OnUse != nil && item.OnUse(g.player) {
-				inv.Remove(g.inventoryCursor)
+				inv.Consume(g.inventoryCursor)
 				if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 					g.inventoryCursor--
 				}
@@ -185,9 +185,9 @@ func (g *Game) updateInventoryItems() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) && g.inventoryCursor < len(inv.Items) {
-		item := inv.Items[g.inventoryCursor]
+		item := inv.Items[g.inventoryCursor].Item
 		if !g.player.IsEquipped(item) {
-			inv.Remove(g.inventoryCursor)
+			inv.Consume(g.inventoryCursor)
 			if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 				g.inventoryCursor--
 			}

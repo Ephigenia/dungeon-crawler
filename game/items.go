@@ -2,6 +2,12 @@ package game
 
 import "image/color"
 
+func init() {
+	ItemSmallHealthPotion.MaxStack = 5
+	ItemMediumHealthPotion.MaxStack = 5
+	ItemLargeHealthPotion.MaxStack = 5
+}
+
 // Predefined item definitions.
 var (
 	// Health potions

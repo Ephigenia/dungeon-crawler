@@ -28,6 +28,7 @@ type Item struct {
 	Image     *ebiten.Image // loaded at startup from ImagePath; nil until then
 	Effect    string
 	StatMods  StatModifiers
+	MaxStack  int                  // max items per inventory slot (0 or 1 = not stackable)
 	OnUse     func(p *Player) bool // returns true if the item is consumed on use
 }
 
