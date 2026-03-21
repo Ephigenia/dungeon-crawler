@@ -29,6 +29,8 @@ type Item struct {
 	Effect    string
 	StatMods  StatModifiers
 	MaxStack  int                  // max items per inventory slot (0 or 1 = not stackable)
+	Power     int                  // weapon attack power, added to player.Attack only on hit
+	Speed     int                  // weapon attack speed (higher = faster)
 	OnUse     func(p *Player) bool // returns true if the item is consumed on use
 }
 

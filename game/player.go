@@ -7,6 +7,7 @@ type Player struct {
 	MaxHP        int
 	Attack       int
 	Defense      int
+	Agility      int
 	Level        int
 	EXP          int
 	NextLevelEXP int
@@ -22,6 +23,7 @@ func newPlayer(x, y int) *Player {
 		MaxHP:        30,
 		Attack:       5,
 		Defense:      2,
+		Agility:      5,
 		Level:        1,
 		EXP:          0,
 		NextLevelEXP: 100,
@@ -34,12 +36,35 @@ func newPlayer(x, y int) *Player {
 func (p *Player) applyStatMods(mods StatModifiers, sign int) {
 	p.Attack += sign * mods.Attack
 	p.Defense += sign * mods.Defense
+	p.Agility += sign * mods.Agility
 	p.MaxHP += sign * mods.HP
 	if p.HP > p.MaxHP {
 		p.HP = p.MaxHP
 	}
 	p.Inventory.MaxItems += sign * mods.InvSlots
 	p.Inventory.MaxWeight += float64(sign) * mods.InvWeight
+}
+
+// WeaponPower returns the combined Power of all items in weapon slots.
+func (p *Player) WeaponPower() int {
+	power := 0
+	for _, slot := range []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon} {
+		if item := p.Equipment.Slots[slot]; item != nil {
+			power += item.Power
+		}
+	}
+	return power
+}
+
+// WeaponSpeed returns the highest Speed among equipped weapons.
+func (p *Player) WeaponSpeed() int {
+	speed := 0
+	for _, slot := range []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon} {
+		if item := p.Equipment.Slots[slot]; item != nil && item.Speed > speed {
+			speed = item.Speed
+		}
+	}
+	return speed
 }
 
 // IsEquipped reports whether item is currently equipped in any slot.
@@ -114,12 +139,9 @@ func (p *Player) IsAlive() bool {
 	return p.HP > 0
 }
 
-// TakeDamage reduces HP by the incoming attack minus defense, minimum 1.
+// TakeDamage reduces HP using the shared damage formula.
 func (p *Player) TakeDamage(attack int) {
-	dmg := attack - p.Defense
-	if dmg < 1 {
-		dmg = 1
-	}
+	dmg := calcDamage(attack, p.Defense)
 	p.HP -= dmg
 	if p.HP < 0 {
 		p.HP = 0

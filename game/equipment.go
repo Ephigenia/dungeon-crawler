@@ -60,6 +60,7 @@ type StatModifiers struct {
 	HP        int
 	Attack    int
 	Defense   int
+	Agility   int
 	InvSlots  int     // extra inventory slots
 	InvWeight float64 // extra carry weight in kg
 }

@@ -113,8 +113,15 @@ func (g *Game) Update() error {
 // resolveCombat handles a bump attack between the player and an enemy.
 func (g *Game) resolveCombat(e *Enemy) {
 	hpBefore := e.HP
-	e.TakeDamage(g.player.Attack)
-	dmg := hpBefore - e.HP
+	dmg := calcPlayerDamage(
+		g.player.Attack, g.player.WeaponPower(), g.player.WeaponSpeed(),
+		g.player.Agility, g.player.Level, e.Defense,
+	)
+	e.HP -= dmg
+	if e.HP < 0 {
+		e.HP = 0
+	}
+	dmg = hpBefore - e.HP
 	g.player.AddEXP(5)
 
 	if e.IsAlive() {

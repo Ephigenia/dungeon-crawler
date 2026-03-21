@@ -108,11 +108,15 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	statsY += 12
 
 	text.Draw(screen, "ATK", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Attack), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Attack+g.player.WeaponPower()), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
 	statsY += 12
 
 	text.Draw(screen, "DEF", g.hudFont, gridX, statsY, dim)
 	text.Draw(screen, fmt.Sprintf("%d", g.player.Defense), g.hudFont, gridX+28, statsY, color.RGBA{100, 160, 220, 255})
+	statsY += 12
+
+	text.Draw(screen, "AGI", g.hudFont, gridX, statsY, dim)
+	text.Draw(screen, fmt.Sprintf("%d", g.player.Agility), g.hudFont, gridX+28, statsY, color.RGBA{152, 210, 152, 255})
 	statsY += 12
 
 	text.Draw(screen, "LVL", g.hudFont, gridX, statsY, dim)
@@ -202,6 +206,20 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 		g.hudFont, x, dy, dim)
 	dy += 14
 
+	if selectedItem.Power > 0 || selectedItem.Speed > 0 {
+		weaponStr := ""
+		if selectedItem.Power > 0 {
+			weaponStr += fmt.Sprintf("Power: +%d", selectedItem.Power)
+		}
+		if selectedItem.Speed > 0 {
+			if weaponStr != "" {
+				weaponStr += "   "
+			}
+			weaponStr += fmt.Sprintf("Speed: %d", selectedItem.Speed)
+		}
+		text.Draw(screen, weaponStr, g.hudFont, x, dy, green)
+		dy += 14
+	}
 	if selectedItem.Effect != "" {
 		text.Draw(screen, fmt.Sprintf("Effect: %s", selectedItem.Effect), g.hudFont, x, dy, green)
 		dy += 14
@@ -214,6 +232,9 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 		}
 		if mods.Defense != 0 {
 			modsStr += fmt.Sprintf("DEF %+d  ", mods.Defense)
+		}
+		if mods.Agility != 0 {
+			modsStr += fmt.Sprintf("AGI %+d  ", mods.Agility)
 		}
 		if mods.HP != 0 {
 			modsStr += fmt.Sprintf("HP %+d", mods.HP)

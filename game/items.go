@@ -27,63 +27,63 @@ var (
 	// Weapons
 	ItemIronSword = &Item{
 		ID: "iron_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/iron_sword.png", Effect: "+1 ATK",
-		StatMods: StatModifiers{Attack: 1},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/iron_sword.png",
+		Power: 3, Speed: 5,
 	}
 	Broadsword = &Item{
-		ID: "broadsword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/broadsword.png", Effect: "+1 ATK",
-		StatMods: StatModifiers{Attack: 1},
+		ID: "broadsword", Weight: 3.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/broadsword.png",
+		Power: 5, Speed: 3,
 	}
 	GoldenSword = &Item{
 		ID: "golden_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/golden_sword.png", Effect: "+2 ATK",
-		StatMods: StatModifiers{Attack: 2},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/golden_sword.png",
+		Power: 7, Speed: 5,
 	}
 	SwordJeweled = &Item{
 		ID: "sword_jeweled", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/sword_jeweled.png", Effect: "+2 ATK +1 DEF",
-		StatMods: StatModifiers{Attack: 2, Defense: 1},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/sword_jeweled.png",
+		Effect: "DEF +1", Power: 8, Speed: 5, StatMods: StatModifiers{Defense: 1},
 	}
 	MegaSword = &Item{
-		ID: "mega_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/mega_sword.png", Effect: "+4 ATK +2 DEF",
-		StatMods: StatModifiers{Attack: 4, Defense: 2},
+		ID: "mega_sword", Weight: 4.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/mega_sword.png",
+		Effect: "DEF +2", Power: 14, Speed: 2, StatMods: StatModifiers{Defense: 2},
 	}
 	Saber = &Item{
-		ID: "saber", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/saber.png", Effect: "+1 ATK",
-		StatMods: StatModifiers{Attack: 1},
+		ID: "saber", Weight: 1.8, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/saber.png",
+		Power: 4, Speed: 7,
 	}
 	Rapier1 = &Item{
-		ID: "rapier", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier1.png", Effect: "+1 ATK",
-		StatMods: StatModifiers{Attack: 1},
+		ID: "rapier", Weight: 1.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier1.png",
+		Power: 3, Speed: 9,
 	}
 	Rapier2 = &Item{
-		ID: "rapier", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier2.png", Effect: "+2 ATK",
-		StatMods: StatModifiers{Attack: 2},
+		ID: "rapier", Weight: 1.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier2.png",
+		Power: 6, Speed: 9,
 	}
 	Axe = &Item{
-		ID: "axe", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/axe.png", Effect: "+1 ATK",
-		StatMods: StatModifiers{Attack: 1},
+		ID: "axe", Weight: 1.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/axe.png",
+		Power: 5, Speed: 4,
 	}
 	Hatchet = &Item{
-		ID: "hatchet", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/hatchet.png", Effect: "+1 ATK",
-		StatMods: StatModifiers{Attack: 1},
+		ID: "hatchet", Weight: 1.1, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/hatchet.png",
+		Power: 4, Speed: 7,
 	}
 	KnightsAxe = &Item{
-		ID: "knights_axe", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/knights_axe.png", Effect: "+2 ATK",
-		StatMods: StatModifiers{Attack: 2},
+		ID: "knights_axe", Weight: 1.6, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/knights_axe.png",
+		Power: 9, Speed: 3,
 	}
 	ExecutionersAxe = &Item{
-		ID: "executioners_axe", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/executioners_axe.png", Effect: "+3 ATK",
-		StatMods: StatModifiers{Attack: 3},
+		ID: "executioners_axe", Weight: 2.2, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/executioners_axe.png",
+		Power: 12, Speed: 2,
 	}
 
 	// Legs
