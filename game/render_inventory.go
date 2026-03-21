@@ -108,15 +108,15 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	statsY += 12
 
 	text.Draw(screen, "ATK", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Attack+g.player.WeaponPower()), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.Attack+g.player.WeaponPower()), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
 	statsY += 12
 
 	text.Draw(screen, "DEF", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Defense), g.hudFont, gridX+28, statsY, color.RGBA{100, 160, 220, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseDefense, g.player.Defense), g.hudFont, gridX+28, statsY, color.RGBA{100, 160, 220, 255})
 	statsY += 12
 
 	text.Draw(screen, "AGI", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Agility), g.hudFont, gridX+28, statsY, color.RGBA{152, 210, 152, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAgility, g.player.Agility), g.hudFont, gridX+28, statsY, color.RGBA{152, 210, 152, 255})
 	statsY += 12
 
 	text.Draw(screen, "LVL", g.hudFont, gridX, statsY, dim)

@@ -8,6 +8,9 @@ type Player struct {
 	Attack       int
 	Defense      int
 	Agility      int
+	BaseAttack   int // base value unaffected by equipment
+	BaseDefense  int
+	BaseAgility  int
 	Level        int
 	EXP          int
 	NextLevelEXP int
@@ -24,6 +27,9 @@ func newPlayer(x, y int) *Player {
 		Attack:       5,
 		Defense:      2,
 		Agility:      5,
+		BaseAttack:   5,
+		BaseDefense:  2,
+		BaseAgility:  5,
 		Level:        1,
 		EXP:          0,
 		NextLevelEXP: 100,

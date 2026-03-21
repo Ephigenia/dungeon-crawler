@@ -122,15 +122,15 @@ func (g *Game) drawHUD(screen *ebiten.Image) {
 	hudY += 12
 
 	text.Draw(screen, "ATK", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Attack+g.player.WeaponPower()), g.hudFont, 32, hudY, color.RGBA{224, 180, 100, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.Attack+g.player.WeaponPower()), g.hudFont, 32, hudY, color.RGBA{224, 180, 100, 255})
 	hudY += 12
 
 	text.Draw(screen, "DEF", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Defense), g.hudFont, 32, hudY, color.RGBA{100, 160, 220, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseDefense, g.player.Defense), g.hudFont, 32, hudY, color.RGBA{100, 160, 220, 255})
 	hudY += 12
 
 	text.Draw(screen, "AGI", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d", g.player.Agility), g.hudFont, 32, hudY, color.RGBA{152, 210, 152, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAgility, g.player.Agility), g.hudFont, 32, hudY, color.RGBA{152, 210, 152, 255})
 	hudY += 12
 
 	text.Draw(screen, "LVL", g.hudFont, 4, hudY, dim)
