@@ -2,6 +2,7 @@ package game
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 
 	"github.com/ephigenia/ebit-engine-game-1/dungeon"
@@ -18,6 +19,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 	if p := g.potionAt(g.player.X, g.player.Y); p != nil {
 		text.Draw(screen, fmt.Sprintf("%s  [P] Pick up", p.Item.ID), g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
+	}
+	if c := g.closedChestAdjacentTo(g.player.X, g.player.Y); c != nil {
+		label := "Wooden Chest"
+		if c.Kind == ChestIron {
+			label = "Iron Chest"
+		}
+		text.Draw(screen, fmt.Sprintf("%s  [O] Open", label), g.hudFont, 4, ScreenH-18, color.RGBA{220, 210, 100, 255})
 	}
 	if g.inventoryOpen {
 		g.drawInventory(screen)
@@ -58,6 +66,25 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 		px := float32(float64(p.X*TileSize) + offsetX + float64(TileSize-pickupSize)/2)
 		py := float32(float64(p.Y*TileSize) + offsetY + float64(TileSize-pickupSize)/2)
 		drawItemSprite(screen, p.Item, px, py, pickupSize, 0)
+	}
+
+	for _, c := range g.chests {
+		col := c.spritesheetCol()
+		row := int(c.Kind)
+		cx := float64(c.X*TileSize) + offsetX
+		cy := float64(c.Y*TileSize) + offsetY
+		if g.chestImg != nil {
+			src := g.chestImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
+			op.GeoM.Reset()
+			op.GeoM.Translate(cx, cy)
+			screen.DrawImage(src, &op)
+		} else {
+			chestCol := color.RGBA{180, 120, 60, 255}
+			if c.Kind == ChestIron {
+				chestCol = color.RGBA{160, 160, 170, 255}
+			}
+			vector.DrawFilledRect(screen, float32(cx)+1, float32(cy)+1, TileSize-2, TileSize-2, chestCol, false)
+		}
 	}
 
 	for _, e := range g.enemies {

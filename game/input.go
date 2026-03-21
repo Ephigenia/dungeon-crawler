@@ -12,6 +12,19 @@ func (g *Game) Update() error {
 	if g.combatFrames > 0 {
 		g.combatFrames--
 	}
+	for _, c := range g.chests {
+		if c.State == ChestStateOpening {
+			c.openingTick--
+			if c.openingTick <= 0 {
+				c.State = ChestStateOpened
+				count := g.rng.Intn(5) + 1
+				for i := 0; i < count; i++ {
+					item := SpawnableItems[g.rng.Intn(len(SpawnableItems))]
+					g.potions = append(g.potions, &Potion{X: g.player.X, Y: g.player.Y, Item: item})
+				}
+			}
+		}
+	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyQ) {
 		return ebiten.Termination
 	}
@@ -69,6 +82,12 @@ func (g *Game) Update() error {
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyR) {
 		g.Regenerate()
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
+		if c := g.closedChestAdjacentTo(g.player.X, g.player.Y); c != nil {
+			c.State = ChestStateOpening
+			c.openingTick = chestOpeningFrames
+		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
 		if p := g.potionAt(g.player.X, g.player.Y); p != nil {

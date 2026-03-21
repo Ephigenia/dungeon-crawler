@@ -11,6 +11,7 @@ import (
 //go:embed assets/Gorgeous-Pixel/GorgeousPixel.ttf
 //go:embed assets/items
 //go:embed assets/player
+//go:embed assets/map
 var assets embed.FS
 
 func main() {

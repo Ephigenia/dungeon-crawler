@@ -13,6 +13,8 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
+const chestSpawnChance = 25 // percent chance per room
+
 // New creates a new game with a generated dungeon.
 func New(assets fs.FS) *Game {
 	cfg := dungeon.DefaultConfig()
@@ -55,6 +57,16 @@ func New(assets fs.FS) *Game {
 	g.enemyImg = ebiten.NewImage(PlayerSize, PlayerSize)
 	g.enemyImg.Fill(colorEnemy)
 
+	if f, err := assets.Open("assets/map/animated_chests.png"); err == nil {
+		if img, _, err := image.Decode(f); err == nil {
+			g.chestImg = ebiten.NewImageFromImage(img)
+		}
+		f.Close()
+	}
+	if g.chestImg == nil {
+		log.Println("warning: could not load assets/map/animated_chests.png")
+	}
+
 	loadItemImages(assets)
 	g.resetEntities(d)
 	return g
@@ -82,6 +94,16 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 		g.enemies = append(g.enemies, spawnEnemy(ex, ey, g.rng))
 	}
 
+	g.chests = g.chests[:0]
+	for _, room := range d.Rooms {
+		if g.rng.Intn(100) < chestSpawnChance {
+			cx, cy := room.Center()
+			if d.IsWalkable(cx, cy) {
+				g.chests = append(g.chests, newChest(cx, cy, g.rng))
+			}
+		}
+	}
+
 	g.potions = g.potions[:0]
 	for _, room := range d.Rooms {
 		count := g.rng.Intn(4) + 1
@@ -105,6 +127,16 @@ func (g *Game) potionAt(x, y int) *Potion {
 	for _, p := range g.potions {
 		if !p.Taken && p.X == x && p.Y == y {
 			return p
+		}
+	}
+	return nil
+}
+
+// closedChestAdjacentTo returns the first closed chest adjacent to (x, y), or nil.
+func (g *Game) closedChestAdjacentTo(x, y int) *Chest {
+	for _, c := range g.chests {
+		if c.State == ChestStateClosed && c.isAdjacentTo(x, y) {
+			return c
 		}
 	}
 	return nil
