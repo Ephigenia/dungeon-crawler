@@ -20,9 +20,9 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	if p := g.potionAt(g.player.X, g.player.Y); p != nil {
 		text.Draw(screen, fmt.Sprintf("%s  [P] Pick up", p.Item.ID), g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
 	}
-	if c := g.closedChestAdjacentTo(g.player.X, g.player.Y); c != nil {
+	if o := g.closedObjectAdjacentTo(g.player.X, g.player.Y); o != nil {
 		label := "Wooden Chest"
-		if c.Kind == ChestIron {
+		if o.Kind == IronChest {
 			label = "Iron Chest"
 		}
 		text.Draw(screen, fmt.Sprintf("%s  [O] Open", label), g.hudFont, 4, ScreenH-18, color.RGBA{220, 210, 100, 255})
@@ -68,22 +68,22 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 		drawItemSprite(screen, p.Item, px, py, pickupSize, 0)
 	}
 
-	for _, c := range g.chests {
-		col := c.spritesheetCol()
-		row := int(c.Kind)
-		cx := float64(c.X*TileSize) + offsetX
-		cy := float64(c.Y*TileSize) + offsetY
-		if g.chestImg != nil {
-			src := g.chestImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
+	for _, o := range g.objects {
+		col := o.spritesheetCol()
+		row := int(o.Kind)
+		ox := float64(o.X*TileSize) + offsetX
+		oy := float64(o.Y*TileSize) + offsetY
+		if g.objectImg != nil {
+			src := g.objectImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
 			op.GeoM.Reset()
-			op.GeoM.Translate(cx, cy)
+			op.GeoM.Translate(ox, oy)
 			screen.DrawImage(src, &op)
 		} else {
-			chestCol := color.RGBA{180, 120, 60, 255}
-			if c.Kind == ChestIron {
-				chestCol = color.RGBA{160, 160, 170, 255}
+			fallbackCol := color.RGBA{180, 120, 60, 255}
+			if o.Kind == IronChest {
+				fallbackCol = color.RGBA{160, 160, 170, 255}
 			}
-			vector.DrawFilledRect(screen, float32(cx)+1, float32(cy)+1, TileSize-2, TileSize-2, chestCol, false)
+			vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, fallbackCol, false)
 		}
 	}
 

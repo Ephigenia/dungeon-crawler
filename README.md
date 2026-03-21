@@ -84,6 +84,10 @@ game/
 - easy
   - add enemy types
   - enemy images
+- items: gems with effects
+- crafting system? make braceletes
+- buffs & potions: timed effects on stats
+- fight: "oil" for weapons?
 - multiple items on the floor, "p" opens interface to select which one to take, a (all)
 - item spawn probabilties
 - graphics: levels

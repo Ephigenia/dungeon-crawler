@@ -37,7 +37,7 @@ type Game struct {
 	holdFramesUp, holdFramesDown, holdFramesLeft, holdFramesRight int
 
 	potions []*Potion
-	chests  []*Chest
+	objects []*Object
 	rng     *rand.Rand
 
 	combatLines  []string
@@ -54,7 +54,7 @@ type Game struct {
 	floorTileImg *ebiten.Image
 	playerImg    *ebiten.Image
 	enemyImg     *ebiten.Image
-	chestImg     *ebiten.Image
+	objectImg    *ebiten.Image
 }
 
 // Layout returns the logical screen size.

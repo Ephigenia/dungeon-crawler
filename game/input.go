@@ -12,11 +12,11 @@ func (g *Game) Update() error {
 	if g.combatFrames > 0 {
 		g.combatFrames--
 	}
-	for _, c := range g.chests {
-		if c.State == ChestStateOpening {
-			c.openingTick--
-			if c.openingTick <= 0 {
-				c.State = ChestStateOpened
+	for _, o := range g.objects {
+		if o.State == ObjectStateOpening {
+			o.openingTick--
+			if o.openingTick <= 0 {
+				o.State = ObjectStateOpened
 				count := g.rng.Intn(5) + 1
 				for i := 0; i < count; i++ {
 					item := SpawnableItems[g.rng.Intn(len(SpawnableItems))]
@@ -84,9 +84,9 @@ func (g *Game) Update() error {
 		g.Regenerate()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
-		if c := g.closedChestAdjacentTo(g.player.X, g.player.Y); c != nil {
-			c.State = ChestStateOpening
-			c.openingTick = chestOpeningFrames
+		if o := g.closedObjectAdjacentTo(g.player.X, g.player.Y); o != nil {
+			o.State = ObjectStateOpening
+			o.openingTick = objectOpeningFrames
 		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
@@ -102,9 +102,11 @@ func (g *Game) Update() error {
 		if e := g.enemyAt(nx, ny); e != nil {
 			g.resolveCombat(e)
 		} else if g.dungeon.IsWalkable(nx, ny) {
-			g.player.X, g.player.Y = nx, ny
-			g.cameraX = float64(g.player.X * TileSize)
-			g.cameraY = float64(g.player.Y * TileSize)
+			if o := g.objectAt(nx, ny); o == nil || o.PassableByPlayer {
+				g.player.X, g.player.Y = nx, ny
+				g.cameraX = float64(g.player.X * TileSize)
+				g.cameraY = float64(g.player.Y * TileSize)
+			}
 		}
 	}
 	return nil

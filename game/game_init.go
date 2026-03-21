@@ -13,7 +13,7 @@ import (
 	"golang.org/x/image/font/opentype"
 )
 
-const chestSpawnChance = 25 // percent chance per room
+const objectSpawnChance = 25 // percent chance per room
 
 // New creates a new game with a generated dungeon.
 func New(assets fs.FS) *Game {
@@ -59,11 +59,11 @@ func New(assets fs.FS) *Game {
 
 	if f, err := assets.Open("assets/map/animated_chests.png"); err == nil {
 		if img, _, err := image.Decode(f); err == nil {
-			g.chestImg = ebiten.NewImageFromImage(img)
+			g.objectImg = ebiten.NewImageFromImage(img)
 		}
 		f.Close()
 	}
-	if g.chestImg == nil {
+	if g.objectImg == nil {
 		log.Println("warning: could not load assets/map/animated_chests.png")
 	}
 
@@ -94,12 +94,12 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 		g.enemies = append(g.enemies, spawnEnemy(ex, ey, g.rng))
 	}
 
-	g.chests = g.chests[:0]
+	g.objects = g.objects[:0]
 	for _, room := range d.Rooms {
-		if g.rng.Intn(100) < chestSpawnChance {
+		if g.rng.Intn(100) < objectSpawnChance {
 			cx, cy := room.Center()
 			if d.IsWalkable(cx, cy) {
-				g.chests = append(g.chests, newChest(cx, cy, g.rng))
+				g.objects = append(g.objects, newObject(cx, cy, g.rng))
 			}
 		}
 	}
@@ -132,11 +132,21 @@ func (g *Game) potionAt(x, y int) *Potion {
 	return nil
 }
 
-// closedChestAdjacentTo returns the first closed chest adjacent to (x, y), or nil.
-func (g *Game) closedChestAdjacentTo(x, y int) *Chest {
-	for _, c := range g.chests {
-		if c.State == ChestStateClosed && c.isAdjacentTo(x, y) {
-			return c
+// objectAt returns the object at (x, y), or nil.
+func (g *Game) objectAt(x, y int) *Object {
+	for _, o := range g.objects {
+		if o.X == x && o.Y == y {
+			return o
+		}
+	}
+	return nil
+}
+
+// closedObjectAdjacentTo returns the first closed object adjacent to (x, y), or nil.
+func (g *Game) closedObjectAdjacentTo(x, y int) *Object {
+	for _, o := range g.objects {
+		if o.State == ObjectStateClosed && o.isAdjacentTo(x, y) {
+			return o
 		}
 	}
 	return nil
