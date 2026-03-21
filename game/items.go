@@ -27,8 +27,63 @@ var (
 	// Weapons
 	ItemIronSword = &Item{
 		ID: "iron_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
-		Color: color.RGBA{180, 185, 198, 255}, Effect: "+5 ATK",
-		StatMods: StatModifiers{Attack: 5},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/iron_sword.png", Effect: "+1 ATK",
+		StatMods: StatModifiers{Attack: 1},
+	}
+	Broadsword = &Item{
+		ID: "broadsword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/broadsword.png", Effect: "+1 ATK",
+		StatMods: StatModifiers{Attack: 1},
+	}
+	GoldenSword = &Item{
+		ID: "golden_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/golden_sword.png", Effect: "+2 ATK",
+		StatMods: StatModifiers{Attack: 2},
+	}
+	SwordJeweled = &Item{
+		ID: "sword_jeweled", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/sword_jeweled.png", Effect: "+2 ATK +1 DEF",
+		StatMods: StatModifiers{Attack: 2, Defense: 1},
+	}
+	MegaSword = &Item{
+		ID: "mega_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/mega_sword.png", Effect: "+4 ATK +2 DEF",
+		StatMods: StatModifiers{Attack: 4, Defense: 2},
+	}
+	Saber = &Item{
+		ID: "saber", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/saber.png", Effect: "+1 ATK",
+		StatMods: StatModifiers{Attack: 1},
+	}
+	Rapier1 = &Item{
+		ID: "rapier", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier1.png", Effect: "+1 ATK",
+		StatMods: StatModifiers{Attack: 1},
+	}
+	Rapier2 = &Item{
+		ID: "rapier", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier2.png", Effect: "+2 ATK",
+		StatMods: StatModifiers{Attack: 2},
+	}
+	Axe = &Item{
+		ID: "axe", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/axe.png", Effect: "+1 ATK",
+		StatMods: StatModifiers{Attack: 1},
+	}
+	Hatchet = &Item{
+		ID: "hatchet", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/hatchet.png", Effect: "+1 ATK",
+		StatMods: StatModifiers{Attack: 1},
+	}
+	KnightsAxe = &Item{
+		ID: "knights_axe", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/knights_axe.png", Effect: "+2 ATK",
+		StatMods: StatModifiers{Attack: 2},
+	}
+	ExecutionersAxe = &Item{
+		ID: "executioners_axe", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon},
+		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/executioners_axe.png", Effect: "+3 ATK",
+		StatMods: StatModifiers{Attack: 3},
 	}
 
 	// Legs
@@ -214,7 +269,8 @@ var (
 	AllItems = []*Item{
 		ItemSmallHealthPotion, ItemMediumHealthPotion, ItemLargeHealthPotion,
 		ItemBreadRoll, ItemGrapes, ItemFriedEgg, ItemMeat, ItemApple, ItemMushroom, ItemPizzaSlice,
-		ItemIronSword,
+		ItemIronSword, Broadsword, GoldenSword, SwordJeweled, MegaSword,
+		Saber, Rapier1, Rapier2, Axe, Hatchet, KnightsAxe, ExecutionersAxe,
 		ItemPants,
 		ItemBasicArmor, ItemComplexArmor, ItemBronzeArmor, ItemGoldArmor,
 		ItemWoodenShield, ItemMetalShield, ItemGoldShield, ItemBronzeShield,
@@ -249,7 +305,8 @@ var (
 		ItemGoldShoes,
 		ItemGrapes,
 		ItemHornHelmet,
-		ItemIronSword,
+		ItemIronSword, Broadsword, GoldenSword, SwordJeweled, MegaSword,
+		Saber, Rapier1, Rapier2, Axe, Hatchet, KnightsAxe, ExecutionersAxe,
 		ItemLargeBackpack,
 		ItemLargeHealthPotion,
 		ItemLeatherShoes,

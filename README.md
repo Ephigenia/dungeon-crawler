@@ -81,9 +81,19 @@ game/
 
 ## Ideas
 
+- multiple items on the floor, "p" opens interface to select which one to take, a (all)
+- item spawn probabilties
+- openable items on the map (with random items inside)
+- graphics: levels
+- enemies: different types
+- enemies: 
+- weapons: range
+- weapons: speed
+- weapons: different attack modes?
+- fight: step-based fight concept
+- item rarities (influencing the stats and positively increasing stats)
 - Drop items onto the map
 - Level/stat requirements for equipping items
-- Attribute system influencing weapon damage (Diablo-style)
 - Item highlighting in inventory when a compatible equipment slot is selected
 - Enemy variants with unique abilities
 - Animated sprites and asset abstraction layer
