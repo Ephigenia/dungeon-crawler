@@ -84,6 +84,9 @@ game/
 - easy
   - add enemy types
   - enemy images
+- tests: add tests for certain assumptions
+  - attack increases with level
+  - items cannot be equipped when stats not matching
 - items: gems with effects
 - crafting system? make braceletes
 - buffs & potions: timed effects on stats
@@ -94,6 +97,9 @@ game/
 - enemies: different types
 - enemies: 
 - items: modifier target: player, enemy
+- map: base map (floor/wall) graphics
+- map: generation algorithms
+- map: additions (decorations: dirt, lights, trees)
 - weapons: range
 - weapons: different attack modes?
 - fight: step-based fight concept

@@ -18,8 +18,8 @@ func (e *Enemy) IsAlive() bool {
 }
 
 // TakeDamage reduces HP using the shared damage formula.
-func (e *Enemy) TakeDamage(attack int) {
-	dmg := calcDamage(attack, e.Defense)
+func (e *Enemy) TakeDamage(attack int, rng *rand.Rand) {
+	dmg := calcDamage(attack, e.Defense, rng)
 	e.HP -= dmg
 	if e.HP < 0 {
 		e.HP = 0
@@ -27,15 +27,17 @@ func (e *Enemy) TakeDamage(attack int) {
 }
 
 // calcPlayerDamage computes damage for a player attack, incorporating weapon
-// power, weapon speed, agility, and level.
+// power, weapon speed, agility, level, and a level-scaled random bonus.
 //
 //   weaponContrib  = weaponPower × (1 + weaponSpeed × agility / 100)
 //   effectiveAttack = (baseAttack + weaponContrib) × (1 + (level−1) × 0.05)
-//   damage          = max(0, int(effectiveAttack) − defense)
-func calcPlayerDamage(baseAttack, weaponPower, weaponSpeed, agility, level, defense int) int {
+//   randomBonus    = rng(0 … level×2)
+//   damage          = max(0, int(effectiveAttack) − defense + randomBonus)
+func calcPlayerDamage(baseAttack, weaponPower, weaponSpeed, agility, level, defense int, rng *rand.Rand) int {
 	weaponContrib := float64(weaponPower) * (1.0 + float64(weaponSpeed)*float64(agility)/100.0)
 	effective := (float64(baseAttack) + weaponContrib) * (1.0 + float64(level-1)*0.05)
-	dmg := int(effective) - defense
+	randomBonus := rng.Intn(level*2 + 1)
+	dmg := int(effective) - defense + randomBonus
 	if dmg < 0 {
 		dmg = 0
 	}
@@ -44,13 +46,15 @@ func calcPlayerDamage(baseAttack, weaponPower, weaponSpeed, agility, level, defe
 
 // calcDamage returns the damage dealt given an attack and defense value.
 // The attack/defense ratio is used as a factor, so higher attack relative
-// to defense amplifies damage. Result is clamped to 0 (no minimum of 1).
-func calcDamage(attack, defense int) int {
+// to defense amplifies damage. A random bonus of 0…attack/2 is added.
+// Result is clamped to 0 (no minimum of 1).
+func calcDamage(attack, defense int, rng *rand.Rand) int {
+	randomBonus := rng.Intn(attack/2 + 1)
 	if defense <= 0 {
-		return attack
+		return attack + randomBonus
 	}
 	factor := float64(attack) / float64(defense)
-	dmg := int(float64(attack-defense) * factor)
+	dmg := int(float64(attack-defense)*factor) + randomBonus
 	if dmg < 0 {
 		dmg = 0
 	}

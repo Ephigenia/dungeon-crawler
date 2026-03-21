@@ -1,5 +1,7 @@
 package game
 
+import "math/rand"
+
 // Player holds the player's state and stats.
 type Player struct {
 	X, Y         int
@@ -146,8 +148,8 @@ func (p *Player) IsAlive() bool {
 }
 
 // TakeDamage reduces HP using the shared damage formula.
-func (p *Player) TakeDamage(attack int) {
-	dmg := calcDamage(attack, p.Defense)
+func (p *Player) TakeDamage(attack int, rng *rand.Rand) {
+	dmg := calcDamage(attack, p.Defense, rng)
 	p.HP -= dmg
 	if p.HP < 0 {
 		p.HP = 0

@@ -117,7 +117,7 @@ func (g *Game) resolveCombat(e *Enemy) {
 	hpBefore := e.HP
 	dmg := calcPlayerDamage(
 		g.player.Attack, g.player.WeaponPower(), g.player.WeaponSpeed(),
-		g.player.Agility, g.player.Level, e.Defense,
+		g.player.Agility, g.player.Level, e.Defense, g.rng,
 	)
 	e.HP -= dmg
 	if e.HP < 0 {
@@ -128,7 +128,7 @@ func (g *Game) resolveCombat(e *Enemy) {
 
 	if e.IsAlive() {
 		playerHpBefore := g.player.HP
-		g.player.TakeDamage(e.Attack)
+		g.player.TakeDamage(e.Attack, g.rng)
 		playerDmg := playerHpBefore - g.player.HP
 		g.combatLines = []string{
 			fmt.Sprintf("Hit %s for %d damage", e.Name, dmg),
