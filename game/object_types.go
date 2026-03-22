@@ -4,6 +4,8 @@ import "image/color"
 
 // Predefined object type definitions.
 var (
+	// Ideas:
+	// sarcophagus, barrel, crate, urn, cabinet, locker, chest of drawers, box, trunk, coffer
 	ObjectTypeWoodenChest = &ObjectType{
 		Name:            "Wooden Chest",
 		Openable:        true,
