@@ -1,47 +1,60 @@
 package game
 
-import "math/rand"
+import (
+	"image/color"
+	"math/rand"
 
-// ObjectKind identifies the type of map object.
-type ObjectKind int
-
-const (
-	WoodenChest ObjectKind = iota // row 0 in chest spritesheet
-	IronChest                     // row 1 in chest spritesheet
-	Vase                          // standalone PNG, not openable
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
-// ObjectState drives which animation frame is shown.
+// ObjectType is the static definition of a map object — its name, behaviour, and visuals.
+// Instances on the map are represented by Object, which holds a pointer to its type
+// plus mutable runtime state (position, open/close state).
+type ObjectType struct {
+	Name             string
+	Openable         bool // player can open with O key
+	PassableByPlayer bool // player can walk onto this tile
+	PassableByEnemy  bool // enemies can walk onto this tile
+	FallbackColor    color.RGBA // drawn when no image is available
+
+	// Standalone image (loaded from ImagePath at startup).
+	ImagePath string
+	Image     *ebiten.Image
+
+	// Spritesheet-based animation (shared animated_chests.png).
+	// When UsesSpritesheet is true the object is rendered by slicing a 16×16
+	// tile from the shared spritesheet at SpritesheetRow.
+	UsesSpritesheet bool
+	SpritesheetRow  int
+}
+
+// ObjectState drives which animation frame / spritesheet column is shown.
 type ObjectState int
 
 const (
-	ObjectStateClosed  ObjectState = iota // frame 0
-	ObjectStateOpening                    // frame 1 (transient)
-	ObjectStateOpened                     // frame 2
+	ObjectStateClosed  ObjectState = iota // column 0
+	ObjectStateOpening                    // column 1 (transient)
+	ObjectStateOpened                     // column 2
 )
 
 // objectOpeningFrames is how many game ticks the opening animation plays.
 const objectOpeningFrames = 20
 
-// Object is an item placed in the dungeon map.
+// Object is a live map object — a placed instance of an ObjectType.
 type Object struct {
-	X, Y             int
-	Kind             ObjectKind
-	State            ObjectState
-	Openable         bool // whether the player can open this object with O
-	openingTick      int  // countdown while State == ObjectStateOpening
-	PassableByPlayer bool // player can walk onto this tile
-	PassableByEnemy  bool // enemies can walk onto this tile
+	X, Y        int
+	Type        *ObjectType
+	State       ObjectState
+	openingTick int // countdown while State == ObjectStateOpening
 }
 
-// newObject creates an object of random kind at (x, y).
+// newObject places a randomly chosen ObjectType at (x, y).
 func newObject(x, y int, rng *rand.Rand) *Object {
-	kind := ObjectKind(rng.Intn(3))
-	openable := kind == WoodenChest || kind == IronChest
-	return &Object{X: x, Y: y, Kind: kind, State: ObjectStateClosed, Openable: openable}
+	t := AllObjectTypes[rng.Intn(len(AllObjectTypes))]
+	return &Object{X: x, Y: y, Type: t, State: ObjectStateClosed}
 }
 
-// spritesheetCol returns the column index (0–2) for the current state.
+// spritesheetCol returns the column index (0–2) in the chest spritesheet for the current state.
 func (o *Object) spritesheetCol() int {
 	switch o.State {
 	case ObjectStateOpening:

@@ -21,11 +21,7 @@ func (g *Game) Draw(screen *ebiten.Image) {
 		text.Draw(screen, fmt.Sprintf("%s  [P] Pick up", p.Item.ID), g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
 	}
 	if o := g.closedObjectAdjacentTo(g.player.X, g.player.Y); o != nil {
-		label := "Wooden Chest"
-		if o.Kind == IronChest {
-			label = "Iron Chest"
-		}
-		text.Draw(screen, fmt.Sprintf("%s  [O] Open", label), g.hudFont, 4, ScreenH-18, color.RGBA{220, 210, 100, 255})
+		text.Draw(screen, fmt.Sprintf("%s  [O] Open", o.Type.Name), g.hudFont, 4, ScreenH-18, color.RGBA{220, 210, 100, 255})
 	}
 	if g.inventoryOpen {
 		g.drawInventory(screen)
@@ -71,32 +67,22 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 	for _, o := range g.objects {
 		ox := float64(o.X*TileSize) + offsetX
 		oy := float64(o.Y*TileSize) + offsetY
-		switch o.Kind {
-		case Vase:
-			if g.vaseImg != nil {
-				iw, ih := g.vaseImg.Bounds().Dx(), g.vaseImg.Bounds().Dy()
-				op.GeoM.Reset()
-				op.GeoM.Scale(float64(TileSize)/float64(iw), float64(TileSize)/float64(ih))
-				op.GeoM.Translate(ox, oy)
-				screen.DrawImage(g.vaseImg, &op)
-			} else {
-				vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, color.RGBA{180, 160, 100, 255}, false)
-			}
-		default: // WoodenChest, IronChest
+		switch {
+		case o.Type.UsesSpritesheet && g.objectImg != nil:
 			col := o.spritesheetCol()
-			row := int(o.Kind)
-			if g.objectImg != nil {
-				src := g.objectImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
-				op.GeoM.Reset()
-				op.GeoM.Translate(ox, oy)
-				screen.DrawImage(src, &op)
-			} else {
-				fallbackCol := color.RGBA{180, 120, 60, 255}
-				if o.Kind == IronChest {
-					fallbackCol = color.RGBA{160, 160, 170, 255}
-				}
-				vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, fallbackCol, false)
-			}
+			row := o.Type.SpritesheetRow
+			src := g.objectImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
+			op.GeoM.Reset()
+			op.GeoM.Translate(ox, oy)
+			screen.DrawImage(src, &op)
+		case o.Type.Image != nil:
+			iw, ih := o.Type.Image.Bounds().Dx(), o.Type.Image.Bounds().Dy()
+			op.GeoM.Reset()
+			op.GeoM.Scale(float64(TileSize)/float64(iw), float64(TileSize)/float64(ih))
+			op.GeoM.Translate(ox, oy)
+			screen.DrawImage(o.Type.Image, &op)
+		default:
+			vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, o.Type.FallbackColor, false)
 		}
 	}
 

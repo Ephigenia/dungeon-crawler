@@ -102,7 +102,7 @@ func (g *Game) Update() error {
 		if e := g.enemyAt(nx, ny); e != nil {
 			g.resolveCombat(e)
 		} else if g.dungeon.IsWalkable(nx, ny) {
-			if o := g.objectAt(nx, ny); o == nil || o.PassableByPlayer {
+			if o := g.objectAt(nx, ny); o == nil || o.Type.PassableByPlayer {
 				g.player.X, g.player.Y = nx, ny
 				g.cameraX = float64(g.player.X * TileSize)
 				g.cameraY = float64(g.player.Y * TileSize)

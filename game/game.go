@@ -54,8 +54,7 @@ type Game struct {
 	floorTileImg *ebiten.Image
 	playerImg    *ebiten.Image
 	enemyImg     *ebiten.Image
-	objectImg    *ebiten.Image
-	vaseImg      *ebiten.Image
+	objectImg    *ebiten.Image // shared spritesheet for animated chest types
 }
 
 // Layout returns the logical screen size.

@@ -192,27 +192,28 @@ game/
 
 ## Ideas
 
-- enemies how can i visualize the leve / strenght of an enemy?
-- system: abstract for asset spritesheet
-- init: character creation
-- init: character stats
-- easy
-  - add enemy types
-  - enemy images
 - tests: add tests for certain assumptions
   - attack increases with level
   - items cannot be equipped when stats not matching
-- items: gems with effects
-- player: stats vs. attributes (attributes long term development, stats short term)
-- crafting system? make braceletes
-- buffs & potions: timed effects on stats
-- fight: "oil" for weapons?
-- multiple items on the floor, "p" opens interface to select which one to take, a (all)
-- item spawn probabilties
-- graphics: levels
-- enemies: different types
-- enemies: movement / pathfinding
 - items: modifier target: player, enemy
+- player: stats vs. attributes (attributes long term development, stats short term)
+- enemies: wayfinding
+- enemies: attack types?
+- enemies: visualize difficulty
+- enemies: spawn positions
+- buffs & potions: timed effects on stats, gems, oils on weapons
+- bugs
+  - when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
+- QoL
+  - multiple items on the floor, "p" opens interface to select which one to take, a (all)
+- QoC
+  - abstraction for image loading, assets, spritemaps, tilemaps
+  - abstraction for tilemaps
+  - abstraction for tilemaps with animations
+- map: walkable and not walkable items, (shelf)
+- map: item spawn probabilties
+- map: tileset floor
+- map: tileset walls
 - map: base map (floor/wall) graphics
 - map: generation algorithms
 - map: additions (decorations: dirt, lights, trees)
@@ -221,6 +222,3 @@ game/
 - fight: step-based fight concept
 - item rarities (influencing the stats and positively increasing stats)
 - Level/stat requirements for equipping items
-- Item highlighting in inventory when a compatible equipment slot is selected
-- Enemy variants with unique abilities
-- Animated sprites and asset abstraction layer
