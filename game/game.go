@@ -55,6 +55,7 @@ type Game struct {
 	playerImg    *ebiten.Image
 	enemyImg     *ebiten.Image
 	objectImg    *ebiten.Image
+	vaseImg      *ebiten.Image
 }
 
 // Layout returns the logical screen size.

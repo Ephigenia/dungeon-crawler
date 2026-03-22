@@ -1,15 +1,28 @@
 package game
 
-import "math/rand"
+import (
+	"math/rand"
 
-// Enemy holds an enemy's state and stats.
+	"github.com/hajimehoshi/ebiten/v2"
+)
+
+// EnemyType is the static definition of an enemy kind — its name and base stats.
+// Instances on the map are represented by Enemy, which holds a pointer to its type
+// plus mutable runtime state (current HP, position).
+type EnemyType struct {
+	Name      string
+	MaxHP     int
+	Attack    int
+	Defense   int
+	ImagePath string        // asset path for the sprite; empty = use color fallback
+	Image     *ebiten.Image // loaded at startup from ImagePath; nil until then
+}
+
+// Enemy is a live enemy on the map.
 type Enemy struct {
-	X, Y    int
-	HP      int
-	MaxHP   int
-	Attack  int
-	Defense int
-	Name    string
+	X, Y int
+	HP   int
+	Type *EnemyType
 }
 
 // IsAlive returns true if the enemy has HP remaining.
@@ -19,20 +32,26 @@ func (e *Enemy) IsAlive() bool {
 
 // TakeDamage reduces HP using the shared damage formula.
 func (e *Enemy) TakeDamage(attack int, rng *rand.Rand) {
-	dmg := calcDamage(attack, e.Defense, rng)
+	dmg := calcDamage(attack, e.Type.Defense, rng)
 	e.HP -= dmg
 	if e.HP < 0 {
 		e.HP = 0
 	}
 }
 
+// spawnEnemy creates a live Enemy from a randomly chosen EnemyType.
+func spawnEnemy(x, y int, rng *rand.Rand) *Enemy {
+	t := AllEnemyTypes[rng.Intn(len(AllEnemyTypes))]
+	return &Enemy{X: x, Y: y, HP: t.MaxHP, Type: t}
+}
+
 // calcPlayerDamage computes damage for a player attack, incorporating weapon
 // power, weapon speed, agility, level, and a level-scaled random bonus.
 //
-//   weaponContrib  = weaponPower × (1 + weaponSpeed × agility / 100)
-//   effectiveAttack = (baseAttack + weaponContrib) × (1 + (level−1) × 0.05)
-//   randomBonus    = rng(0 … level×2)
-//   damage          = max(0, int(effectiveAttack) − defense + randomBonus)
+//	weaponContrib   = weaponPower × (1 + weaponSpeed × agility / 100)
+//	effectiveAttack = (baseAttack + weaponContrib) × (1 + (level−1) × 0.05)
+//	randomBonus     = rng(0 … level×2)
+//	damage          = max(0, int(effectiveAttack) − defense + randomBonus)
 func calcPlayerDamage(baseAttack, weaponPower, weaponSpeed, agility, level, defense int, rng *rand.Rand) int {
 	weaponContrib := float64(weaponPower) * (1.0 + float64(weaponSpeed)*float64(agility)/100.0)
 	effective := (float64(baseAttack) + weaponContrib) * (1.0 + float64(level-1)*0.05)
@@ -59,29 +78,4 @@ func calcDamage(attack, defense int, rng *rand.Rand) int {
 		dmg = 0
 	}
 	return dmg
-}
-
-var enemyTypes = []struct {
-	name    string
-	hp      int
-	attack  int
-	defense int
-}{
-	{"Goblin", 8, 3, 0},
-	{"Orc", 15, 5, 2},
-	{"Skeleton", 10, 4, 1},
-	{"Troll", 22, 7, 3},
-}
-
-func spawnEnemy(x, y int, rng *rand.Rand) *Enemy {
-	t := enemyTypes[rng.Intn(len(enemyTypes))]
-	return &Enemy{
-		X:       x,
-		Y:       y,
-		HP:      t.hp,
-		MaxHP:   t.hp,
-		Attack:  t.attack,
-		Defense: t.defense,
-		Name:    t.name,
-	}
 }

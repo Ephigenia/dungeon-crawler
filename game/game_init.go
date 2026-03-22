@@ -67,7 +67,18 @@ func New(assets fs.FS) *Game {
 		log.Println("warning: could not load assets/map/animated_chests.png")
 	}
 
+	if f, err := assets.Open("assets/map/vase.png"); err == nil {
+		if img, _, err := image.Decode(f); err == nil {
+			g.vaseImg = ebiten.NewImageFromImage(img)
+		}
+		f.Close()
+	}
+	if g.vaseImg == nil {
+		log.Println("warning: could not load assets/map/vase.png")
+	}
+
 	loadItemImages(assets)
+	loadEnemyImages(assets)
 	g.resetEntities(d)
 	return g
 }
@@ -142,10 +153,10 @@ func (g *Game) objectAt(x, y int) *Object {
 	return nil
 }
 
-// closedObjectAdjacentTo returns the first closed object adjacent to (x, y), or nil.
+// closedObjectAdjacentTo returns the first openable closed object adjacent to (x, y), or nil.
 func (g *Game) closedObjectAdjacentTo(x, y int) *Object {
 	for _, o := range g.objects {
-		if o.State == ObjectStateClosed && o.isAdjacentTo(x, y) {
+		if o.Openable && o.State == ObjectStateClosed && o.isAdjacentTo(x, y) {
 			return o
 		}
 	}

@@ -251,7 +251,7 @@ var (
 	// Backpacks
 	ItemSmallBackpack = &Item{
 		ID: "small_backpack", Weight: 1.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotBackpack},
-		Color: color.RGBA{180, 138, 88, 255}, ImagePath: "assets/items/gear/backpack/basic.png",
+		Color: color.RGBA{180, 138, 88, 255}, ImagePath: "assets/items/gear/backpack/small.png",
 		Effect: "+10 slots, +5 kg", StatMods: StatModifiers{InvSlots: 10, InvWeight: 5.0},
 	}
 	ItemMediumBackpack = &Item{

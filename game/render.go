@@ -69,21 +69,34 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 	}
 
 	for _, o := range g.objects {
-		col := o.spritesheetCol()
-		row := int(o.Kind)
 		ox := float64(o.X*TileSize) + offsetX
 		oy := float64(o.Y*TileSize) + offsetY
-		if g.objectImg != nil {
-			src := g.objectImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
-			op.GeoM.Reset()
-			op.GeoM.Translate(ox, oy)
-			screen.DrawImage(src, &op)
-		} else {
-			fallbackCol := color.RGBA{180, 120, 60, 255}
-			if o.Kind == IronChest {
-				fallbackCol = color.RGBA{160, 160, 170, 255}
+		switch o.Kind {
+		case Vase:
+			if g.vaseImg != nil {
+				iw, ih := g.vaseImg.Bounds().Dx(), g.vaseImg.Bounds().Dy()
+				op.GeoM.Reset()
+				op.GeoM.Scale(float64(TileSize)/float64(iw), float64(TileSize)/float64(ih))
+				op.GeoM.Translate(ox, oy)
+				screen.DrawImage(g.vaseImg, &op)
+			} else {
+				vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, color.RGBA{180, 160, 100, 255}, false)
 			}
-			vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, fallbackCol, false)
+		default: // WoodenChest, IronChest
+			col := o.spritesheetCol()
+			row := int(o.Kind)
+			if g.objectImg != nil {
+				src := g.objectImg.SubImage(image.Rect(col*16, row*16, col*16+16, row*16+16)).(*ebiten.Image)
+				op.GeoM.Reset()
+				op.GeoM.Translate(ox, oy)
+				screen.DrawImage(src, &op)
+			} else {
+				fallbackCol := color.RGBA{180, 120, 60, 255}
+				if o.Kind == IronChest {
+					fallbackCol = color.RGBA{160, 160, 170, 255}
+				}
+				vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, fallbackCol, false)
+			}
 		}
 	}
 
@@ -93,10 +106,16 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 		}
 		ex := float64(e.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
 		ey := float64(e.Y*TileSize) + offsetY + float64(TileSize-PlayerSize)/2
+		eImg := g.enemyImg
+		if e.Type.Image != nil {
+			eImg = e.Type.Image
+		}
+		iw, ih := eImg.Bounds().Dx(), eImg.Bounds().Dy()
 		op.GeoM.Reset()
+		op.GeoM.Scale(float64(PlayerSize)/float64(iw), float64(PlayerSize)/float64(ih))
 		op.GeoM.Translate(ex, ey)
-		screen.DrawImage(g.enemyImg, &op)
-		drawStatBar(screen, float32(ex), float32(ey)+PlayerSize+1, PlayerSize, e.HP, e.MaxHP,
+		screen.DrawImage(eImg, &op)
+		drawStatBar(screen, float32(ex), float32(ey)+PlayerSize+1, PlayerSize, e.HP, e.Type.MaxHP,
 			color.RGBA{30, 30, 30, 200}, color.RGBA{224, 108, 117, 255})
 	}
 

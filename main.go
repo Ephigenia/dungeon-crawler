@@ -12,6 +12,7 @@ import (
 //go:embed assets/items
 //go:embed assets/player
 //go:embed assets/map
+//go:embed assets/enemies
 var assets embed.FS
 
 func main() {

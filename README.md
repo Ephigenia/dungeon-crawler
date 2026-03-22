@@ -192,8 +192,8 @@ game/
 
 ## Ideas
 
+- enemies how can i visualize the leve / strenght of an enemy?
 - system: abstract for asset spritesheet
-- system: 
 - init: character creation
 - init: character stats
 - easy
