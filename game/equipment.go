@@ -56,13 +56,20 @@ func slotLabel(s EquipmentSlot) string {
 }
 
 // StatModifiers holds stat changes applied when an item is equipped.
+// Flat bonuses (HP, Attack, Defense, Agility) are added to the base stat.
+// Percentage bonuses (*Pct) multiply the result: final = (base + flat) × (1 + pct/100).
+// Multiple percentage bonuses from different items are summed before applying.
 type StatModifiers struct {
-	HP        int
-	Attack    int
-	Defense   int
-	Agility   int
-	InvSlots  int     // extra inventory slots
-	InvWeight float64 // extra carry weight in kg
+	HP         int
+	Attack     int
+	Defense    int
+	Agility    int
+	HPPct      float64 // % bonus to max HP
+	AttackPct  float64 // % bonus to attack
+	DefensePct float64 // % bonus to defense
+	AgilityPct float64 // % bonus to agility
+	InvSlots   int     // extra inventory slots
+	InvWeight  float64 // extra carry weight in kg
 }
 
 // Equipment tracks the item equipped in each slot.

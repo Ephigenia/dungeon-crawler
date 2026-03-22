@@ -116,8 +116,8 @@ func (g *Game) Update() error {
 func (g *Game) resolveCombat(e *Enemy) {
 	hpBefore := e.HP
 	dmg := calcPlayerDamage(
-		g.player.Attack, g.player.WeaponPower(), g.player.WeaponSpeed(),
-		g.player.Agility, g.player.Level, e.Defense, g.rng,
+		g.player.EffectiveAttack(), g.player.WeaponPower(), g.player.WeaponSpeed(),
+		g.player.EffectiveAgility(), g.player.Level, e.Defense, g.rng,
 	)
 	e.HP -= dmg
 	if e.HP < 0 {

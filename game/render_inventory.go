@@ -102,21 +102,21 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 	statsY += 16
 
 	text.Draw(screen, "HP", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.HP, g.player.MaxHP), g.hudFont, gridX+28, statsY, white)
-	drawStatBar(screen, float32(gridX+90), float32(statsY-9), 80, g.player.HP, g.player.MaxHP,
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.HP, g.player.EffectiveMaxHP()), g.hudFont, gridX+28, statsY, white)
+	drawStatBar(screen, float32(gridX+90), float32(statsY-9), 80, g.player.HP, g.player.EffectiveMaxHP(),
 		color.RGBA{50, 20, 20, 220}, color.RGBA{200, 60, 60, 255})
 	statsY += 12
 
 	text.Draw(screen, "ATK", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.Attack+g.player.WeaponPower()), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.EffectiveAttack()+g.player.WeaponPower()), g.hudFont, gridX+28, statsY, color.RGBA{224, 180, 100, 255})
 	statsY += 12
 
 	text.Draw(screen, "DEF", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseDefense, g.player.Defense), g.hudFont, gridX+28, statsY, color.RGBA{100, 160, 220, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseDefense, g.player.EffectiveDefense()), g.hudFont, gridX+28, statsY, color.RGBA{100, 160, 220, 255})
 	statsY += 12
 
 	text.Draw(screen, "AGI", g.hudFont, gridX, statsY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAgility, g.player.Agility), g.hudFont, gridX+28, statsY, color.RGBA{152, 210, 152, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAgility, g.player.EffectiveAgility()), g.hudFont, gridX+28, statsY, color.RGBA{152, 210, 152, 255})
 	statsY += 12
 
 	text.Draw(screen, "LVL", g.hudFont, gridX, statsY, dim)
@@ -230,14 +230,26 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 		if mods.Attack != 0 {
 			modsStr += fmt.Sprintf("ATK %+d  ", mods.Attack)
 		}
+		if mods.AttackPct != 0 {
+			modsStr += fmt.Sprintf("ATK %+.0f%%  ", mods.AttackPct)
+		}
 		if mods.Defense != 0 {
 			modsStr += fmt.Sprintf("DEF %+d  ", mods.Defense)
+		}
+		if mods.DefensePct != 0 {
+			modsStr += fmt.Sprintf("DEF %+.0f%%  ", mods.DefensePct)
 		}
 		if mods.Agility != 0 {
 			modsStr += fmt.Sprintf("AGI %+d  ", mods.Agility)
 		}
+		if mods.AgilityPct != 0 {
+			modsStr += fmt.Sprintf("AGI %+.0f%%  ", mods.AgilityPct)
+		}
 		if mods.HP != 0 {
-			modsStr += fmt.Sprintf("HP %+d", mods.HP)
+			modsStr += fmt.Sprintf("HP %+d  ", mods.HP)
+		}
+		if mods.HPPct != 0 {
+			modsStr += fmt.Sprintf("HP %+.0f%%", mods.HPPct)
 		}
 		text.Draw(screen, modsStr, g.hudFont, x, dy, green)
 		dy += 14

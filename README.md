@@ -51,7 +51,19 @@ make build && ./dungeon-crawler
 The HUD and inventory panel show stats as `base / effective`, where *effective* includes all equipment bonuses.
 
 ### Leveling Up
-Each level-up increases MaxHP by 10%, restores HP to full, raises the EXP threshold by 25%, and increases inventory capacity by ~5%.
+Each level-up applies the following stat growth and then restores HP to the new effective maximum:
+
+| Stat | Growth |
+|------|--------|
+| MaxHP | +10% per level |
+| Attack | +1 every level |
+| Defense | +1 every 2 levels |
+| Agility | +1 every 3 levels |
+| Inventory | +5% slots and weight per level |
+
+The EXP threshold follows an exponential curve: `100 × level^1.5` (e.g. 283 for L2→L3, 520 for L3→L4).
+
+Equipment bonuses are **never** baked into the base stats. Each effective stat is computed on the fly as `base + sum(equipped item bonuses)`, so equip/unequip always yields the exact correct value.
 
 ## Combat
 
@@ -180,6 +192,8 @@ game/
 
 ## Ideas
 
+- system: abstract for asset spritesheet
+- system: 
 - init: character creation
 - init: character stats
 - easy

@@ -1,16 +1,24 @@
 package game
 
-import "math/rand"
+import (
+	"math"
+	"math/rand"
+)
+
+const (
+	xpBase     = 100
+	xpExponent = 1.5
+)
 
 // Player holds the player's state and stats.
+// Base stats (BaseAttack, BaseDefense, BaseAgility, BaseMaxHP) grow on level-up
+// and are never mutated by equipment. Effective stats are derived at call time
+// via EffectiveXxx() methods, which add the sum of all equipped-item bonuses.
 type Player struct {
 	X, Y         int
 	HP           int
-	MaxHP        int
-	Attack       int
-	Defense      int
-	Agility      int
-	BaseAttack   int // base value unaffected by equipment
+	BaseMaxHP    int
+	BaseAttack   int
 	BaseDefense  int
 	BaseAgility  int
 	Level        int
@@ -25,10 +33,7 @@ func newPlayer(x, y int) *Player {
 		X:            x,
 		Y:            y,
 		HP:           30,
-		MaxHP:        30,
-		Attack:       5,
-		Defense:      2,
-		Agility:      5,
+		BaseMaxHP:    30,
 		BaseAttack:   5,
 		BaseDefense:  2,
 		BaseAgility:  5,
@@ -40,17 +45,61 @@ func newPlayer(x, y int) *Player {
 	}
 }
 
-// applyStatMods adds or subtracts stat modifiers (sign = +1 or -1).
-func (p *Player) applyStatMods(mods StatModifiers, sign int) {
-	p.Attack += sign * mods.Attack
-	p.Defense += sign * mods.Defense
-	p.Agility += sign * mods.Agility
-	p.MaxHP += sign * mods.HP
-	if p.HP > p.MaxHP {
-		p.HP = p.MaxHP
+// equipmentStatMods returns the cumulative stat modifiers of all equipped items.
+func (p *Player) equipmentStatMods() StatModifiers {
+	var total StatModifiers
+	for _, item := range p.Equipment.Slots {
+		if item != nil {
+			total.Attack += item.StatMods.Attack
+			total.Defense += item.StatMods.Defense
+			total.Agility += item.StatMods.Agility
+			total.HP += item.StatMods.HP
+			total.AttackPct += item.StatMods.AttackPct
+			total.DefensePct += item.StatMods.DefensePct
+			total.AgilityPct += item.StatMods.AgilityPct
+			total.HPPct += item.StatMods.HPPct
+		}
 	}
+	return total
+}
+
+// applyPct applies a percentage modifier: result = int(base × (1 + pct/100)).
+func applyPct(base int, pct float64) int {
+	return int(float64(base) * (1.0 + pct/100.0))
+}
+
+// EffectiveMaxHP returns the HP cap including all equipment bonuses.
+func (p *Player) EffectiveMaxHP() int {
+	mods := p.equipmentStatMods()
+	return applyPct(p.BaseMaxHP+mods.HP, mods.HPPct)
+}
+
+// EffectiveAttack returns the attack stat including all equipment bonuses.
+func (p *Player) EffectiveAttack() int {
+	mods := p.equipmentStatMods()
+	return applyPct(p.BaseAttack+mods.Attack, mods.AttackPct)
+}
+
+// EffectiveDefense returns the defense stat including all equipment bonuses.
+func (p *Player) EffectiveDefense() int {
+	mods := p.equipmentStatMods()
+	return applyPct(p.BaseDefense+mods.Defense, mods.DefensePct)
+}
+
+// EffectiveAgility returns the agility stat including all equipment bonuses.
+func (p *Player) EffectiveAgility() int {
+	mods := p.equipmentStatMods()
+	return applyPct(p.BaseAgility+mods.Agility, mods.AgilityPct)
+}
+
+// applyStatMods adjusts inventory capacity when equipping/unequipping items.
+// Combat stats are derived dynamically; HP is clamped to the current effective cap.
+func (p *Player) applyStatMods(mods StatModifiers, sign int) {
 	p.Inventory.MaxItems += sign * mods.InvSlots
 	p.Inventory.MaxWeight += float64(sign) * mods.InvWeight
+	if p.HP > p.EffectiveMaxHP() {
+		p.HP = p.EffectiveMaxHP()
+	}
 }
 
 // WeaponPower returns the combined Power of all items in weapon slots.
@@ -121,15 +170,34 @@ func (p *Player) Unequip(slot EquipmentSlot) bool {
 	}
 	p.applyStatMods(item.StatMods, -1)
 	p.Equipment.Slots[slot] = nil
+	// Re-clamp HP now that the effective cap may have dropped.
+	if p.HP > p.EffectiveMaxHP() {
+		p.HP = p.EffectiveMaxHP()
+	}
 	return true
 }
 
-// levelUp increases the player's level and improves stats.
+// levelUp increases the player's level and improves all base stats.
+//
+// Stat growth per level:
+//   - BaseMaxHP: +10%
+//   - BaseAttack: +1 every level
+//   - BaseDefense: +1 every 2 levels
+//   - BaseAgility: +1 every 3 levels
+//
+// XP threshold follows an exponential curve: xpBase × level^xpExponent.
 func (p *Player) levelUp() {
 	p.Level++
-	p.MaxHP = p.MaxHP * 110 / 100
-	p.HP = p.MaxHP
-	p.NextLevelEXP = p.NextLevelEXP * 125 / 100
+	p.BaseMaxHP = p.BaseMaxHP * 110 / 100
+	p.HP = p.EffectiveMaxHP()
+	p.BaseAttack++
+	if p.Level%2 == 0 {
+		p.BaseDefense++
+	}
+	if p.Level%3 == 0 {
+		p.BaseAgility++
+	}
+	p.NextLevelEXP = int(float64(xpBase) * math.Pow(float64(p.Level), xpExponent))
 	p.Inventory.levelUp()
 }
 
@@ -149,7 +217,7 @@ func (p *Player) IsAlive() bool {
 
 // TakeDamage reduces HP using the shared damage formula.
 func (p *Player) TakeDamage(attack int, rng *rand.Rand) {
-	dmg := calcDamage(attack, p.Defense, rng)
+	dmg := calcDamage(attack, p.EffectiveDefense(), rng)
 	p.HP -= dmg
 	if p.HP < 0 {
 		p.HP = 0

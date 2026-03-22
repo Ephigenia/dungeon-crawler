@@ -116,21 +116,21 @@ func (g *Game) drawHUD(screen *ebiten.Image) {
 	hudY := 14
 
 	text.Draw(screen, "HP", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.HP, g.player.MaxHP), g.hudFont, 32, hudY, color.White)
-	drawStatBar(screen, 94, float32(hudY-9), 80, g.player.HP, g.player.MaxHP,
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.HP, g.player.EffectiveMaxHP()), g.hudFont, 32, hudY, color.White)
+	drawStatBar(screen, 94, float32(hudY-9), 80, g.player.HP, g.player.EffectiveMaxHP(),
 		color.RGBA{50, 20, 20, 220}, color.RGBA{200, 60, 60, 255})
 	hudY += 12
 
 	text.Draw(screen, "ATK", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.Attack+g.player.WeaponPower()), g.hudFont, 32, hudY, color.RGBA{224, 180, 100, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.EffectiveAttack()+g.player.WeaponPower()), g.hudFont, 32, hudY, color.RGBA{224, 180, 100, 255})
 	hudY += 12
 
 	text.Draw(screen, "DEF", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseDefense, g.player.Defense), g.hudFont, 32, hudY, color.RGBA{100, 160, 220, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseDefense, g.player.EffectiveDefense()), g.hudFont, 32, hudY, color.RGBA{100, 160, 220, 255})
 	hudY += 12
 
 	text.Draw(screen, "AGI", g.hudFont, 4, hudY, dim)
-	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAgility, g.player.Agility), g.hudFont, 32, hudY, color.RGBA{152, 210, 152, 255})
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAgility, g.player.EffectiveAgility()), g.hudFont, 32, hudY, color.RGBA{152, 210, 152, 255})
 	hudY += 12
 
 	text.Draw(screen, "LVL", g.hudFont, 4, hudY, dim)
