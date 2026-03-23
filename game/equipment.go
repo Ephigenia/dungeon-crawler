@@ -60,14 +60,14 @@ func slotLabel(s EquipmentSlot) string {
 // Percentage bonuses (*Pct) multiply the result: final = (base + flat) × (1 + pct/100).
 // Multiple percentage bonuses from different items are summed before applying.
 type StatModifiers struct {
-	HP         int
-	Attack     int
-	Defense    int
 	Agility    int
-	HPPct      float64 // % bonus to max HP
-	AttackPct  float64 // % bonus to attack
-	DefensePct float64 // % bonus to defense
 	AgilityPct float64 // % bonus to agility
+	Attack     int
+	AttackPct  float64 // % bonus to attack
+	Defense    int
+	DefensePct float64 // % bonus to defense
+	HP         int
+	HPPct      float64 // % bonus to max HP
 	InvSlots   int     // extra inventory slots
 	InvWeight  float64 // extra carry weight in kg
 }
