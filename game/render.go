@@ -30,6 +30,11 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // drawWorld renders dungeon tiles, pickups, enemies, and the player.
 func (g *Game) drawWorld(screen *ebiten.Image) {
+	if g.wallTileImg == nil {
+		g.wallTileImg = g.tilemap.Sprite(15)
+		g.floorTileImg = g.tilemap.Sprite(5)
+	}
+
 	offsetX := float64(ScreenW/2) - g.cameraX
 	offsetY := float64(ScreenH/2) - g.cameraY
 
@@ -42,8 +47,8 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 	for ty := startTileY; ty <= endTileY; ty++ {
 		for tx := startTileX; tx <= endTileX; tx++ {
 			t := g.dungeon.At(tx, ty)
-			px := float64(tx*TileSize) + offsetX + 0.5
-			py := float64(ty*TileSize) + offsetY + 0.5
+			px := float64(tx*TileSize) + offsetX
+			py := float64(ty*TileSize) + offsetY
 			op.GeoM.Reset()
 			op.GeoM.Translate(px, py)
 			if t == dungeon.Wall {

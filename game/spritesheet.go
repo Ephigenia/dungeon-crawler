@@ -1,6 +1,7 @@
 package game
 
 import (
+	"image"
 	"io/fs"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -50,9 +51,5 @@ func (s *Spritesheet) Sprite(index int) *ebiten.Image {
 	x := col * s.spriteW
 	y := row * s.spriteH
 
-	dst := ebiten.NewImage(s.spriteW, s.spriteH)
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(float64(-x), float64(-y))
-	dst.DrawImage(s.img, op)
-	return dst
+	return s.img.SubImage(image.Rect(x, y, x+s.spriteW, y+s.spriteH)).(*ebiten.Image)
 }

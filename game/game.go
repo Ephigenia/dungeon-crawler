@@ -50,8 +50,9 @@ type Game struct {
 
 	hudFont font.Face
 
-	wallTileImg  *ebiten.Image
-	floorTileImg *ebiten.Image
+	tilemap      *Spritesheet  // source for wall/floor tiles
+	wallTileImg  *ebiten.Image // lazily extracted on first draw
+	floorTileImg *ebiten.Image // lazily extracted on first draw
 	playerImg    *ebiten.Image
 	enemyImg     *ebiten.Image
 	objectImg    *ebiten.Image // shared spritesheet for animated chest types
