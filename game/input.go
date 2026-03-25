@@ -12,6 +12,7 @@ func (g *Game) Update() error {
 	if g.combatFrames > 0 {
 		g.combatFrames--
 	}
+	g.updateEnemies()
 	for _, o := range g.objects {
 		if o.State == ObjectStateOpening {
 			o.openingTick--

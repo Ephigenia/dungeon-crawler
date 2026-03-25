@@ -18,11 +18,25 @@ type EnemyType struct {
 	Image     *ebiten.Image // loaded at startup from ImagePath; nil until then
 }
 
+type enemyState int
+
+const (
+	enemyStateIdle  enemyState = iota
+	enemyStateChase
+)
+
+const (
+	enemyMoveInterval = 15 // frames between enemy moves (~4/sec at 60fps)
+	enemyChaseRange   = 8  // Manhattan distance that triggers chase
+)
+
 // Enemy is a live enemy on the map.
 type Enemy struct {
-	X, Y int
-	HP   int
-	Type *EnemyType
+	X, Y     int
+	HP       int
+	Type     *EnemyType
+	state    enemyState
+	moveTick int
 }
 
 // IsAlive returns true if the enemy has HP remaining.

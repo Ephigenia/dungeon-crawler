@@ -232,3 +232,4 @@ game/
 - [x] map: simple tileset floor
 - [x] map: simple tileset walls
 - [x] map: simple base map (floor/wall) graphics
+- [x] enemies: idle+chase
