@@ -192,34 +192,43 @@ game/
 
 ## Ideas
 
-- tests: add tests for certain assumptions
-  - attack increases with level
-  - items cannot be equipped when stats not matching
-- items: modifier target: player, enemy
-- player: stats vs. attributes (attributes long term development, stats short term)
-- enemies: wayfinding
-- enemies: attack types?
-- enemies: visualize difficulty
-- enemies: spawn positions
-- buffs & potions: timed effects on stats, gems, oils on weapons
-- bugs
-  - when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
-- QoL
-  - multiple items on the floor, "p" opens interface to select which one to take, a (all)
-- QoC
-  - abstraction for image loading, assets, spritemaps, tilemaps
-  - abstraction for tilemaps
-  - abstraction for tilemaps with animations
-- map: walkable and not walkable items, (shelf)
-- map: item spawn probabilties
-- map: tileset floor
-- map: tileset walls
-- map: base map (floor/wall) graphics
-- map: generation algorithms
-- map: additions (decorations: dirt, lights, trees)
-- weapons: range
-- weapons: different attack modes?
-- fight: step-based fight concept
-- item: durability for weapons
-- item rarities (influencing the stats and positively increasing stats)
-- Level/stat requirements for equipping items
+- [ ] buffs: timed effects on items (weapons, armor, equipables)
+- [ ] buffs: timed effects on stats
+- [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
+- [ ] concept: general game concept
+- [ ] debug: add debug menu/command line
+- [ ] debug: include "r" which re-creates level
+- [ ] enemies: attack types?
+- [ ] enemies: spawn positions
+- [ ] enemies: visualize difficulty
+- [ ] enemies: wayfinding
+- [ ] fight: different attack modes?
+- [ ] fight: range?
+- [ ] fight: step-based fight concept
+- [ ] items: durability for weapons
+- [ ] items: modifier target: player, enemy
+- [ ] items: rarities (influencing the stats and positively increasing stats)
+- [ ] items: requirements for equipping items
+- [ ] map: 47 floor tileset
+- [ ] map: 47 wall tileset
+- [ ] map: floor decorations
+- [ ] map: generation algorithms
+- [ ] map: item spawn probabilties
+- [ ] map: openable items spawn probability
+- [ ] map: walkable and not walkable items, (shelf)
+- [ ] map: wall decorations
+- [ ] player: stats vs. attributes (attributes long term development, stats short term)
+- [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
+- [ ] QoC: abstraction for tilemaps
+- [ ] QoC: abstraction for tilemaps with animations
+- [ ] QoL: multiple items on the floor, "a" to get them all
+- [ ] QoL: multiple items on the floor, "p" opens interface to select which one to take, a (all)
+- [ ] tests: add tests for certain assumptions
+- [ ] tests: attack increases with level
+- [ ] tests: items cannot be equipped when stats not matching
+
+#### Done
+
+- [x] map: simple tileset floor
+- [x] map: simple tileset walls
+- [x] map: simple base map (floor/wall) graphics
