@@ -138,6 +138,17 @@ func (g *Game) potionAt(x, y int) *Potion {
 	return nil
 }
 
+// potionsAt returns all untaken pickups at (x, y).
+func (g *Game) potionsAt(x, y int) []*Potion {
+	var result []*Potion
+	for _, p := range g.potions {
+		if !p.Taken && p.X == x && p.Y == y {
+			result = append(result, p)
+		}
+	}
+	return result
+}
+
 // objectAt returns the object at (x, y), or nil.
 func (g *Game) objectAt(x, y int) *Object {
 	for _, o := range g.objects {

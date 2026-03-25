@@ -17,11 +17,24 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawHUD(screen)
 	g.drawCombatNotification(screen)
 
-	if p := g.potionAt(g.player.X, g.player.Y); p != nil {
-		text.Draw(screen, fmt.Sprintf("%s  [P] Pick up", p.Item.ID), g.hudFont, 4, ScreenH-6, color.RGBA{220, 210, 100, 255})
+	const floorHintLineH = 12
+	floorItems := g.potionsAt(g.player.X, g.player.Y)
+	if len(floorItems) > 0 {
+		itemColor := color.RGBA{220, 210, 100, 255}
+		// Bottom line: keybind hint
+		hint := "[P] Pick up  [A] Pick up all"
+		if len(floorItems) > 1 {
+			hint = "[A] Pick up all"
+		}
+		text.Draw(screen, hint, g.hudFont, 4, ScreenH-6, itemColor)
+		for i, p := range floorItems {
+			y := ScreenH - 6 - (i+1)*floorHintLineH
+			text.Draw(screen, p.Item.ID, g.hudFont, 4, y, itemColor)
+		}
 	}
+	objectHintY := ScreenH - 6 - (len(floorItems)+1)*floorHintLineH
 	if o := g.closedObjectAdjacentTo(g.player.X, g.player.Y); o != nil {
-		text.Draw(screen, fmt.Sprintf("%s  [O] Open", o.Type.Name), g.hudFont, 4, ScreenH-18, color.RGBA{220, 210, 100, 255})
+		text.Draw(screen, fmt.Sprintf("%s  [O] Open", o.Type.Name), g.hudFont, 4, objectHintY, color.RGBA{220, 210, 100, 255})
 	}
 	if g.inventoryOpen {
 		g.drawInventory(screen)

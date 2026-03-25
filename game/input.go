@@ -40,9 +40,21 @@ func (g *Game) Update() error {
 		return nil
 	}
 
+	suppressLeft := false
+	if inpututil.IsKeyJustPressed(ebiten.KeyA) {
+		if items := g.potionsAt(g.player.X, g.player.Y); len(items) > 0 {
+			suppressLeft = true
+			for _, p := range items {
+				if g.player.Inventory.Add(p.Item) {
+					p.Taken = true
+				}
+			}
+		}
+	}
+
 	up := ebiten.IsKeyPressed(ebiten.KeyArrowUp) || ebiten.IsKeyPressed(ebiten.KeyW)
 	down := ebiten.IsKeyPressed(ebiten.KeyArrowDown) || ebiten.IsKeyPressed(ebiten.KeyS)
-	left := ebiten.IsKeyPressed(ebiten.KeyArrowLeft) || ebiten.IsKeyPressed(ebiten.KeyA)
+	left := ebiten.IsKeyPressed(ebiten.KeyArrowLeft) || (!suppressLeft && ebiten.IsKeyPressed(ebiten.KeyA))
 	right := ebiten.IsKeyPressed(ebiten.KeyArrowRight) || ebiten.IsKeyPressed(ebiten.KeyD)
 
 	if up {
