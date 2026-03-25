@@ -34,7 +34,9 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 		for i := 0; i < 16; i++ {
 			g.wallTiles[i] = g.tilemap.Sprite(i)
 		}
-		g.floorTileImg = g.tilemap.Sprite(0)
+		for i := 0; i < 9; i++ {
+			g.floorTiles[i] = g.floormap.Sprite(i)
+		}
 	}
 
 	offsetX := float64(ScreenW/2) - g.cameraX
@@ -70,7 +72,8 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 				}
 				screen.DrawImage(g.wallTiles[mask], &op)
 			} else {
-				screen.DrawImage(g.floorTileImg, &op)
+				idx := ((tx * 2741) ^ (ty * 1543)) % 9
+				screen.DrawImage(g.floorTiles[idx], &op)
 			}
 		}
 	}

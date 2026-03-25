@@ -42,6 +42,10 @@ func New(assets fs.FS) *Game {
 	if g.tilemap == nil {
 		log.Fatal("could not load assets/map/tilemap_auto.png")
 	}
+	g.floormap = LoadSpritesheet(assets, "assets/map/floor.png", 16, 16)
+	if g.floormap == nil {
+		log.Fatal("could not load assets/map/floor.png")
+	}
 
 	if f, err := assets.Open("assets/player/player.png"); err == nil {
 		if img, _, err := image.Decode(f); err == nil {
