@@ -151,8 +151,10 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 	screen.DrawImage(g.playerImg, &op)
 }
 
-// drawHUD renders the player stats overlay in the top-left corner.
+// drawHUD renders the player stats overlay in the top-left corner and FPS top-right.
 func (g *Game) drawHUD(screen *ebiten.Image) {
+	fps := fmt.Sprintf("FPS %d", int(ebiten.ActualFPS()))
+	text.Draw(screen, fps, g.hudFont, ScreenW-len(fps)*6-4, 14, color.RGBA{120, 120, 120, 255})
 	inv := g.player.Inventory
 	dim := color.RGBA{160, 160, 160, 255}
 	hudY := 14
