@@ -220,5 +220,6 @@ game/
 - weapons: range
 - weapons: different attack modes?
 - fight: step-based fight concept
+- item: durability for weapons
 - item rarities (influencing the stats and positively increasing stats)
 - Level/stat requirements for equipping items

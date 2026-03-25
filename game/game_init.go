@@ -38,10 +38,10 @@ func New(assets fs.FS) *Game {
 		log.Fatalf("new font face: %v", err)
 	}
 
-	g.wallTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
-	g.wallTileImg.Fill(colorWall)
-	g.floorTileImg = ebiten.NewImage(TileSize-1, TileSize-1)
-	g.floorTileImg.Fill(colorFloor)
+	g.tilemap = LoadSpritesheet(assets, "assets/map/tilemap_auto.png", 16, 16)
+	if g.tilemap == nil {
+		log.Fatal("could not load assets/map/tilemap_auto.png")
+	}
 
 	if f, err := assets.Open("assets/player/player.png"); err == nil {
 		if img, _, err := image.Decode(f); err == nil {

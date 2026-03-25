@@ -30,6 +30,13 @@ func (g *Game) Draw(screen *ebiten.Image) {
 
 // drawWorld renders dungeon tiles, pickups, enemies, and the player.
 func (g *Game) drawWorld(screen *ebiten.Image) {
+	if g.wallTiles[0] == nil {
+		for i := 0; i < 16; i++ {
+			g.wallTiles[i] = g.tilemap.Sprite(i)
+		}
+		g.floorTileImg = g.tilemap.Sprite(0)
+	}
+
 	offsetX := float64(ScreenW/2) - g.cameraX
 	offsetY := float64(ScreenH/2) - g.cameraY
 
@@ -42,12 +49,26 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 	for ty := startTileY; ty <= endTileY; ty++ {
 		for tx := startTileX; tx <= endTileX; tx++ {
 			t := g.dungeon.At(tx, ty)
-			px := float64(tx*TileSize) + offsetX + 0.5
-			py := float64(ty*TileSize) + offsetY + 0.5
+			px := float64(tx*TileSize) + offsetX
+			py := float64(ty*TileSize) + offsetY
 			op.GeoM.Reset()
 			op.GeoM.Translate(px, py)
 			if t == dungeon.Wall {
-				screen.DrawImage(g.wallTileImg, &op)
+				const maskUp, maskLeft, maskRight, maskDown = 1, 2, 4, 8
+				mask := 0
+				if g.dungeon.At(tx, ty-1) == dungeon.Wall {
+					mask |= maskUp
+				}
+				if g.dungeon.At(tx-1, ty) == dungeon.Wall {
+					mask |= maskLeft
+				}
+				if g.dungeon.At(tx+1, ty) == dungeon.Wall {
+					mask |= maskRight
+				}
+				if g.dungeon.At(tx, ty+1) == dungeon.Wall {
+					mask |= maskDown
+				}
+				screen.DrawImage(g.wallTiles[mask], &op)
 			} else {
 				screen.DrawImage(g.floorTileImg, &op)
 			}
