@@ -21,10 +21,11 @@ var (
 		SpritesheetRow:  1,
 	}
 	ObjectTypeVase = &ObjectType{
-		Name:          "Vase",
-		Openable:      false,
-		FallbackColor: color.RGBA{180, 160, 100, 255},
-		ImagePath:     "assets/map/vase.png",
+		Name:             "Vase",
+		Openable:         false,
+		FallbackColor:    color.RGBA{180, 160, 100, 255},
+		SpritesheetPath:  "assets/map/map_objects.png",
+		SpritesheetIndex: 0,
 	}
 )
 

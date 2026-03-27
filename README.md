@@ -217,6 +217,7 @@ game/
 - [ ] items: modifier target: player, enemy
 - [ ] items: rarities (influencing the stats and positively increasing stats)
 - [ ] items: requirements for equipping items
+- [ ] items: consumable books, affect abilities
 - [ ] map: 47 floor tileset
 - [ ] map: 47 wall tileset
 - [ ] map: floor decorations

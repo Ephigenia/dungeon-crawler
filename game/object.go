@@ -26,6 +26,11 @@ type ObjectType struct {
 	// tile from the shared spritesheet at SpritesheetRow.
 	UsesSpritesheet bool
 	SpritesheetRow  int
+
+	// Static sprite from a 1-column spritesheet (e.g. assets/map/map_objects.png).
+	// SpritesheetIndex selects the row (0 = top sprite).
+	SpritesheetPath  string
+	SpritesheetIndex int
 }
 
 // ObjectState drives which animation frame / spritesheet column is shown.

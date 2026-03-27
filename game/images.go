@@ -44,8 +44,17 @@ func loadEnemyImages(assets fs.FS) {
 // Types that use the shared spritesheet (UsesSpritesheet == true) are skipped.
 func loadObjectImages(assets fs.FS) {
 	for _, ot := range AllObjectTypes {
-		if !ot.UsesSpritesheet {
-			ot.Image = loadImageFile(assets, ot.ImagePath)
+		if ot.UsesSpritesheet {
+			continue
 		}
+		if ot.SpritesheetPath != "" {
+			sheet := loadImageFile(assets, ot.SpritesheetPath)
+			if sheet != nil {
+				y := ot.SpritesheetIndex * TileSize
+				ot.Image = sheet.SubImage(image.Rect(0, y, TileSize, y+TileSize)).(*ebiten.Image)
+			}
+			continue
+		}
+		ot.Image = loadImageFile(assets, ot.ImagePath)
 	}
 }
