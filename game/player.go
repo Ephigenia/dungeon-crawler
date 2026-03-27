@@ -8,6 +8,10 @@ import (
 const (
 	xpBase     = 100
 	xpExponent = 1.5
+
+	staminaRegenInterval = 30 // frames between passive regen ticks (~2/sec at 60 fps)
+	staminaCostMove      = 1
+	staminaCostAction    = 2
 )
 
 // Player holds the player's state and stats.
@@ -15,33 +19,38 @@ const (
 // and are never mutated by equipment. Effective stats are derived at call time
 // via EffectiveXxx() methods, which add the sum of all equipped-item bonuses.
 type Player struct {
-	X, Y         int
-	HP           int
-	BaseMaxHP    int
-	BaseAttack   int
-	BaseDefense  int
-	BaseAgility  int
-	Level        int
-	EXP          int
-	NextLevelEXP int
-	Inventory    *Inventory
-	Equipment    *Equipment
+	X, Y            int
+	HP              int
+	BaseMaxHP       int
+	BaseAttack      int
+	BaseDefense     int
+	BaseAgility     int
+	BaseMaxStamina  int
+	Stamina         int
+	Level           int
+	EXP             int
+	NextLevelEXP    int
+	Inventory       *Inventory
+	Equipment       *Equipment
+	staminaRegenTick int
 }
 
 func newPlayer(x, y int) *Player {
 	return &Player{
-		X:            x,
-		Y:            y,
-		HP:           30,
-		BaseMaxHP:    30,
-		BaseAttack:   5,
-		BaseDefense:  2,
-		BaseAgility:  5,
-		Level:        1,
-		EXP:          0,
-		NextLevelEXP: 100,
-		Inventory:    newInventory(),
-		Equipment:    newEquipment(),
+		X:              x,
+		Y:              y,
+		HP:             30,
+		BaseMaxHP:      30,
+		BaseAttack:     5,
+		BaseDefense:    2,
+		BaseAgility:    5,
+		BaseMaxStamina: 20,
+		Stamina:        20,
+		Level:          1,
+		EXP:            0,
+		NextLevelEXP:   100,
+		Inventory:      newInventory(),
+		Equipment:      newEquipment(),
 	}
 }
 
@@ -90,6 +99,36 @@ func (p *Player) EffectiveDefense() int {
 func (p *Player) EffectiveAgility() int {
 	mods := p.equipmentStatMods()
 	return applyPct(p.BaseAgility+mods.Agility, mods.AgilityPct)
+}
+
+// EffectiveMaxStamina returns the stamina cap (no equipment modifiers yet).
+func (p *Player) EffectiveMaxStamina() int {
+	return p.BaseMaxStamina
+}
+
+// SpendStamina deducts amount from current stamina, clamped to 0.
+func (p *Player) SpendStamina(amount int) {
+	p.Stamina -= amount
+	if p.Stamina < 0 {
+		p.Stamina = 0
+	}
+}
+
+// RestoreStamina adds amount to current stamina, clamped to the effective max.
+func (p *Player) RestoreStamina(amount int) {
+	p.Stamina += amount
+	if p.Stamina > p.EffectiveMaxStamina() {
+		p.Stamina = p.EffectiveMaxStamina()
+	}
+}
+
+// tickStaminaRegen advances the passive regen timer and restores 1 stamina when it fires.
+func (p *Player) tickStaminaRegen() {
+	p.staminaRegenTick++
+	if p.staminaRegenTick >= staminaRegenInterval {
+		p.staminaRegenTick = 0
+		p.RestoreStamina(1)
+	}
 }
 
 // applyStatMods adjusts inventory capacity when equipping/unequipping items.
@@ -197,6 +236,8 @@ func (p *Player) levelUp() {
 	if p.Level%3 == 0 {
 		p.BaseAgility++
 	}
+	p.BaseMaxStamina += 2
+	p.RestoreStamina(p.EffectiveMaxStamina())
 	p.NextLevelEXP = int(float64(xpBase) * math.Pow(float64(p.Level), xpExponent))
 	p.Inventory.levelUp()
 }

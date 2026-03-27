@@ -115,7 +115,7 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 		candidates := shelfCandidates(d, room)
 		if len(candidates) > 0 {
 			pos := candidates[g.rng.Intn(len(candidates))]
-			g.objects = append(g.objects, &Object{X: pos[0], Y: pos[1], Type: ObjectTypeShelf})
+			g.objects = append(g.objects, &Object{X: pos[0], Y: pos[1], Type: ObjectTypeShelf, HP: ObjectTypeShelf.MaxHP})
 		}
 	}
 
@@ -202,10 +202,10 @@ func (g *Game) potionsAt(x, y int) []*Potion {
 	return result
 }
 
-// objectAt returns the object at (x, y), or nil.
+// objectAt returns the non-destroyed object at (x, y), or nil.
 func (g *Game) objectAt(x, y int) *Object {
 	for _, o := range g.objects {
-		if o.X == x && o.Y == y {
+		if !o.Destroyed && o.X == x && o.Y == y {
 			return o
 		}
 	}

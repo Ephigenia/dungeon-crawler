@@ -210,8 +210,9 @@ game/
 - [ ] enemies: wayfinding
 - [ ] enemies: should not be allowed to walk across chests
 - [ ] fight: different attack modes?
-- [x] fight: how to handle attacks from enemies (counter-attacks, blocks)
 - [ ] fight: range?
+- [ ] fight: critical chance
+- [ ] fight: armor + armor penetration
 - [ ] fight: step-based fight concept
 - [ ] items: durability for weapons
 - [ ] items: modifier target: player, enemy
@@ -219,19 +220,20 @@ game/
 - [ ] items: requirements for equipping items
 - [ ] items: consumable books, affect abilities
 - [ ] map: 47 floor tileset
-- [ ] map: 47 wall tileset
 - [ ] map: floor decorations
 - [ ] map: room decorations, corners, shaped walls
 - [ ] map: traps
 - [ ] map: doors
-- [ ] map: shelfes
+- [ ] map: destructable objects, not walkable but attackable, have health-points and spawn items on destruction
 - [ ] map: secrets (walk next to secrets to discover)
 - [ ] map: generation algorithms
 - [ ] map: item spawn probabilties
 - [ ] map: openable items spawn probability
 - [ ] map: walkable and not walkable items, (shelf)
 - [ ] map: wall decorations
-- [ ] player: stats vs. attributes (attributes long term development, stats short term)
+- [ ] buff: eating system
+- [ ] player: stats vs. attributes (attributes long term development, stats short term), core attribute vs. attribute
+- [ ] player: core attributes: strength, 
 - [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
 - [ ] QoC: object, items reference instance of spreadsheet (name, index)
 - [ ] QoC: abstraction for tilemaps
@@ -242,10 +244,13 @@ game/
 - [ ] tests: attack increases with level
 - [ ] tests: items cannot be equipped when stats not matching
 
+
 #### Done
 
+- [x] map: shelfes
 - [x] map: simple tileset floor
 - [x] map: simple tileset walls
 - [x] map: simple base map (floor/wall) graphics
 - [x] enemies: idle+chase
 - [x] debug: fps counter
+- [x] fight: how to handle attacks from enemies (counter-attacks, blocks)

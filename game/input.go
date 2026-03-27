@@ -12,6 +12,7 @@ func (g *Game) Update() error {
 	if g.combatFrames > 0 {
 		g.combatFrames--
 	}
+	g.player.tickStaminaRegen()
 	g.updateEnemies()
 	for _, o := range g.objects {
 		if o.State == ObjectStateOpening {
@@ -112,6 +113,7 @@ func (g *Game) Update() error {
 			} else {
 				o.openingTick = objectOpeningFrames
 			}
+			g.player.SpendStamina(staminaCostAction)
 		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {
@@ -126,11 +128,26 @@ func (g *Game) Update() error {
 		nx, ny := g.player.X+dx, g.player.Y+dy
 		if e := g.enemyAt(nx, ny); e != nil {
 			g.resolveCombat(e)
+			g.player.SpendStamina(staminaCostAction)
 		} else if g.dungeon.IsWalkable(nx, ny) {
 			if o := g.objectAt(nx, ny); o == nil || o.Type.PassableByPlayer {
 				g.player.X, g.player.Y = nx, ny
 				g.cameraX = float64(g.player.X * TileSize)
 				g.cameraY = float64(g.player.Y * TileSize)
+				g.player.SpendStamina(staminaCostMove)
+			} else if o.Type.Destructable {
+				dmg := calcPlayerDamage(
+					g.player.EffectiveAttack(), g.player.WeaponPower(), g.player.WeaponSpeed(),
+					g.player.EffectiveAgility(), g.player.Level, 0, g.rng,
+				)
+				if dmg < 1 {
+					dmg = 1
+				}
+				o.HP -= dmg
+				if o.HP <= 0 {
+					o.Destroyed = true
+				}
+				g.player.SpendStamina(staminaCostAction)
 			}
 		}
 	}

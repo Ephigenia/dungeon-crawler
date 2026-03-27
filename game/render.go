@@ -102,6 +102,9 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 	}
 
 	for _, o := range g.objects {
+		if o.Destroyed {
+			continue
+		}
 		ox := float64(o.X*TileSize) + offsetX
 		oy := float64(o.Y*TileSize) + offsetY
 		switch {

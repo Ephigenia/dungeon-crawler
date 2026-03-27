@@ -37,6 +37,11 @@ type ObjectType struct {
 	// Loot, when non-nil, is called to produce the items dropped on open.
 	// When nil the default random loot logic is used.
 	Loot func(rng *rand.Rand) []*Item
+
+	// Destructable objects have HP and are destroyed when it reaches zero.
+	// The player destroys them by bumping into them.
+	Destructable bool
+	MaxHP        int
 }
 
 // ObjectState drives which animation frame / spritesheet column is shown.
@@ -57,12 +62,14 @@ type Object struct {
 	Type        *ObjectType
 	State       ObjectState
 	openingTick int // countdown while State == ObjectStateOpening
+	HP          int // current HP for destructable objects
+	Destroyed   bool
 }
 
 // newObject places a randomly chosen ObjectType at (x, y).
 func newObject(x, y int, rng *rand.Rand) *Object {
 	t := AllObjectTypes[rng.Intn(len(AllObjectTypes))]
-	return &Object{X: x, Y: y, Type: t, State: ObjectStateClosed}
+	return &Object{X: x, Y: y, Type: t, State: ObjectStateClosed, HP: t.MaxHP}
 }
 
 // spritesheetCol returns the column index (0–2) in the chest spritesheet for the current state.

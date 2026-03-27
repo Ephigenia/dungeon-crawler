@@ -55,13 +55,16 @@ func newConsumable(id string, weight float64, heal int, col color.RGBA, imagePat
 		ImagePath: imagePath,
 		Effect:    effect,
 		OnUse: func(p *Player) bool {
-			if p.HP >= p.EffectiveMaxHP() {
+			hpFull := p.HP >= p.EffectiveMaxHP()
+			staminaFull := p.Stamina >= p.EffectiveMaxStamina()
+			if hpFull && staminaFull {
 				return false
 			}
 			p.HP += heal
 			if p.HP > p.EffectiveMaxHP() {
 				p.HP = p.EffectiveMaxHP()
 			}
+			p.RestoreStamina(heal)
 			return true
 		},
 	}

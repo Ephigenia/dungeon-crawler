@@ -30,6 +30,15 @@ var (
 		SpritesheetPath:  "assets/map/map_objects.png",
 		SpritesheetIndex: 0,
 	}
+	ObjectTypeCrate = &ObjectType{
+		Name:             "Crate",
+		Openable:         false,
+		FallbackColor:    color.RGBA{140, 100, 60, 255},
+		SpritesheetPath:  "assets/map/map_objects.png",
+		SpritesheetIndex: 2,
+		Destructable:     true,
+		MaxHP:            3,
+	}
 	// ObjectTypeShelf is placed against walls only; spawned separately from AllObjectTypes.
 	ObjectTypeShelf = &ObjectType{
 		Name:                 "Shelf",
@@ -49,4 +58,5 @@ var AllObjectTypes = []*ObjectType{
 	ObjectTypeWoodenChest,
 	ObjectTypeIronChest,
 	ObjectTypeVase,
+	ObjectTypeCrate,
 }
