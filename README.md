@@ -196,7 +196,9 @@ game/
 - [ ] buffs: timed effects on items (weapons, armor, equipables)
 - [ ] buffs: timed effects on stats
 - [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
-- [ ] concept: general game concept
+- [ ] general: general game concept
+- [ ] graphics: high-resolution images
+- [ ] graphics: pixel perfect font rendering
 - [ ] debug: add debug menu/command line
 - [ ] debug: include "r" which re-creates level
 - [ ] enemies: sensor based follow (https://www.lexaloffle.com/bbs/?tid=48889)
@@ -205,6 +207,7 @@ game/
 - [ ] enemies: visualize difficulty
 - [ ] enemies: wayfinding
 - [ ] fight: different attack modes?
+- [x] fight: how to handle attacks from enemies (counter-attacks, blocks)
 - [ ] fight: range?
 - [ ] fight: step-based fight concept
 - [ ] items: durability for weapons
@@ -214,6 +217,11 @@ game/
 - [ ] map: 47 floor tileset
 - [ ] map: 47 wall tileset
 - [ ] map: floor decorations
+- [ ] map: room decorations, corners, shaped walls
+- [ ] map: traps
+- [ ] map: doors
+- [ ] map: shelfes
+- [ ] map: secrets (walk next to secrets to discover)
 - [ ] map: generation algorithms
 - [ ] map: item spawn probabilties
 - [ ] map: openable items spawn probability

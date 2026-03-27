@@ -86,15 +86,62 @@ func (g *Game) enemyWander(e *Enemy) {
 	}
 }
 
-// resolveEnemyAttack applies damage from an enemy to the player and updates
-// the combat notification.
+// counterChance returns the probability (0–100) that the player can counter
+// an incoming enemy attack. Base 30% + 2% per agility point, capped at 80%.
+func (g *Game) counterChance() int {
+	chance := 30 + g.player.EffectiveAgility()*2
+	if chance > 80 {
+		chance = 80
+	}
+	return chance
+}
+
+// resolveEnemyAttack applies damage from an enemy to the player, then gives
+// the player a chance to counter-attack based on agility.
 func (g *Game) resolveEnemyAttack(e *Enemy) {
+	// Enemy attacks player.
 	hpBefore := g.player.HP
 	g.player.TakeDamage(e.Type.Attack, g.rng)
 	dmg := hpBefore - g.player.HP
-	g.combatLines = []string{
-		fmt.Sprintf("%s attacks you for %d damage!", e.Type.Name, dmg),
-		fmt.Sprintf("You: %d / %d HP", g.player.HP, g.player.EffectiveMaxHP()),
+
+	chance := g.counterChance()
+	countered := g.rng.Intn(100) < chance
+
+	if countered {
+		// Player counter-attacks.
+		counterDmg := calcPlayerDamage(
+			g.player.EffectiveAttack(), g.player.WeaponPower(), g.player.WeaponSpeed(),
+			g.player.EffectiveAgility(), g.player.Level, e.Type.Defense, g.rng,
+		)
+		e.HP -= counterDmg
+		if e.HP < 0 {
+			e.HP = 0
+		}
+
+		if e.IsAlive() {
+			g.combatLines = []string{
+				fmt.Sprintf("%s attacks you for %d damage!", e.Type.Name, dmg),
+				fmt.Sprintf("You counter for %d damage! (%d%% chance)", counterDmg, chance),
+				fmt.Sprintf("%s: %d / %d HP", e.Type.Name, e.HP, e.Type.MaxHP),
+				fmt.Sprintf("You: %d / %d HP", g.player.HP, g.player.EffectiveMaxHP()),
+			}
+		} else {
+			g.player.AddEXP(20)
+			g.combatLines = []string{
+				fmt.Sprintf("%s attacks you for %d damage!", e.Type.Name, dmg),
+				fmt.Sprintf("You counter for %d — %s defeated! (%d%% chance)", counterDmg, e.Type.Name, chance),
+				fmt.Sprintf("You: %d / %d HP", g.player.HP, g.player.EffectiveMaxHP()),
+			}
+			dropChance := 10 + (g.player.Level - 1)
+			if g.rng.Intn(100) < dropChance {
+				g.potions = append(g.potions, newPotion(e.X, e.Y, g.rng))
+			}
+		}
+	} else {
+		g.combatLines = []string{
+			fmt.Sprintf("%s attacks you for %d damage! (no counter, %d%% chance)", e.Type.Name, dmg, chance),
+			fmt.Sprintf("You: %d / %d HP", g.player.HP, g.player.EffectiveMaxHP()),
+		}
 	}
 	g.combatFrames = 120
 }
