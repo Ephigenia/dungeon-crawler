@@ -66,8 +66,10 @@ func (g *Game) enemyChaseMove(e *Enemy) {
 			return
 		}
 		if g.dungeon.IsWalkable(nx, ny) && g.enemyAt(nx, ny) == nil {
-			e.X, e.Y = nx, ny
-			return
+			if o := g.objectAt(nx, ny); o == nil || o.Type.PassableByEnemy {
+				e.X, e.Y = nx, ny
+				return
+			}
 		}
 	}
 }
@@ -80,8 +82,10 @@ func (g *Game) enemyWander(e *Enemy) {
 		nx, ny := e.X+d[0], e.Y+d[1]
 		if g.dungeon.IsWalkable(nx, ny) && g.enemyAt(nx, ny) == nil &&
 			!(nx == g.player.X && ny == g.player.Y) {
-			e.X, e.Y = nx, ny
-			return
+			if o := g.objectAt(nx, ny); o == nil || o.Type.PassableByEnemy {
+				e.X, e.Y = nx, ny
+				return
+			}
 		}
 	}
 }
