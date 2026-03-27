@@ -192,40 +192,42 @@ game/
 
 ## Ideas
 
-- [ ] buffs: timed effects on items (weapons, armor, equipables)
-- [ ] buffs: timed effects on stats
-- [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
+- [ ] general: non-grid movement, move by pixels and not grid positions
+- [ ] buffs: timed effects on items (weapons, armor, equipables)
+- [ ] buffs: timed effects on stats
+- [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
 - [ ] concept: general game concept
 - [ ] debug: add debug menu/command line
 - [ ] debug: include "r" which re-creates level
-- [ ] enemies: attack types?
-- [ ] enemies: spawn positions
-- [ ] enemies: visualize difficulty
-- [ ] enemies: wayfinding
+- [ ] enemies: sensor based follow (https://www.lexaloffle.com/bbs/?tid=48889)
+- [ ] enemies: attack types?
+- [ ] enemies: spawn positions
+- [ ] enemies: visualize difficulty
+- [ ] enemies: wayfinding
 - [ ] fight: different attack modes?
-- [ ] fight: range?
-- [ ] fight: step-based fight concept
-- [ ] items: durability for weapons
-- [ ] items: modifier target: player, enemy
-- [ ] items: rarities (influencing the stats and positively increasing stats)
-- [ ] items: requirements for equipping items
+- [ ] fight: range?
+- [ ] fight: step-based fight concept
+- [ ] items: durability for weapons
+- [ ] items: modifier target: player, enemy
+- [ ] items: rarities (influencing the stats and positively increasing stats)
+- [ ] items: requirements for equipping items
 - [ ] map: 47 floor tileset
 - [ ] map: 47 wall tileset
-- [ ] map: floor decorations
-- [ ] map: generation algorithms
-- [ ] map: item spawn probabilties
-- [ ] map: openable items spawn probability
-- [ ] map: walkable and not walkable items, (shelf)
-- [ ] map: wall decorations
-- [ ] player: stats vs. attributes (attributes long term development, stats short term)
-- [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
-- [ ] QoC: abstraction for tilemaps
-- [ ] QoC: abstraction for tilemaps with animations
-- [ ] QoL: multiple items on the floor, "a" to get them all
-- [ ] QoL: multiple items on the floor, "p" opens interface to select which one to take, a (all)
-- [ ] tests: add tests for certain assumptions
-- [ ] tests: attack increases with level
-- [ ] tests: items cannot be equipped when stats not matching
+- [ ] map: floor decorations
+- [ ] map: generation algorithms
+- [ ] map: item spawn probabilties
+- [ ] map: openable items spawn probability
+- [ ] map: walkable and not walkable items, (shelf)
+- [ ] map: wall decorations
+- [ ] player: stats vs. attributes (attributes long term development, stats short term)
+- [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
+- [ ] QoC: abstraction for tilemaps
+- [ ] QoC: abstraction for tilemaps with animations
+- [ ] QoL: multiple items on the floor, "a" to get them all
+- [ ] QoL: multiple items on the floor, "p" opens interface to select which one to take, a (all)
+- [ ] tests: add tests for certain assumptions
+- [ ] tests: attack increases with level
+- [ ] tests: items cannot be equipped when stats not matching
 
 #### Done
 
