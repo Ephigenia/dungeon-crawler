@@ -31,6 +31,12 @@ type ObjectType struct {
 	// SpritesheetIndex selects the row (0 = top sprite).
 	SpritesheetPath  string
 	SpritesheetIndex int
+
+	// SkipOpeningAnimation makes the object open instantly (no animation frames).
+	SkipOpeningAnimation bool
+	// Loot, when non-nil, is called to produce the items dropped on open.
+	// When nil the default random loot logic is used.
+	Loot func(rng *rand.Rand) []*Item
 }
 
 // ObjectState drives which animation frame / spritesheet column is shown.

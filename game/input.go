@@ -18,9 +18,17 @@ func (g *Game) Update() error {
 			o.openingTick--
 			if o.openingTick <= 0 {
 				o.State = ObjectStateOpened
-				count := g.rng.Intn(5) + 1
-				for i := 0; i < count; i++ {
-					item := SpawnableItems[g.rng.Intn(len(SpawnableItems))]
+				var items []*Item
+				if o.Type.Loot != nil {
+					items = o.Type.Loot(g.rng)
+				} else {
+					count := g.rng.Intn(5) + 1
+					items = make([]*Item, count)
+					for i := range items {
+						items[i] = SpawnableItems[g.rng.Intn(len(SpawnableItems))]
+					}
+				}
+				for _, item := range items {
 					g.potions = append(g.potions, &Potion{X: g.player.X, Y: g.player.Y, Item: item})
 				}
 			}
@@ -99,7 +107,11 @@ func (g *Game) Update() error {
 	if inpututil.IsKeyJustPressed(ebiten.KeyO) {
 		if o := g.closedObjectAdjacentTo(g.player.X, g.player.Y); o != nil {
 			o.State = ObjectStateOpening
-			o.openingTick = objectOpeningFrames
+			if o.Type.SkipOpeningAnimation {
+				o.openingTick = 1
+			} else {
+				o.openingTick = objectOpeningFrames
+			}
 		}
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyP) {

@@ -110,6 +110,15 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 		}
 	}
 
+	// Spawn shelves against walls, one attempt per room, never blocking exits.
+	for _, room := range d.Rooms {
+		candidates := shelfCandidates(d, room)
+		if len(candidates) > 0 {
+			pos := candidates[g.rng.Intn(len(candidates))]
+			g.objects = append(g.objects, &Object{X: pos[0], Y: pos[1], Type: ObjectTypeShelf})
+		}
+	}
+
 	g.potions = g.potions[:0]
 	for _, room := range d.Rooms {
 		count := g.rng.Intn(4) + 1
@@ -126,6 +135,50 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 			}
 		}
 	}
+}
+
+// shelfCandidates returns floor tiles inside room that are adjacent to a wall
+// but are not room exits (border tiles that connect to a corridor outside).
+func shelfCandidates(d *dungeon.Dungeon, room dungeon.Room) [][2]int {
+	dirs := [4][2]int{{0, -1}, {0, 1}, {-1, 0}, {1, 0}}
+	var out [][2]int
+	for y := room.Y; y < room.Y+room.H; y++ {
+		for x := room.X; x < room.X+room.W; x++ {
+			if !d.IsWalkable(x, y) {
+				continue
+			}
+			adjWall := false
+			for _, dir := range dirs {
+				if d.At(x+dir[0], y+dir[1]) == dungeon.Wall {
+					adjWall = true
+					break
+				}
+			}
+			if !adjWall || isRoomExit(d, room, x, y) {
+				continue
+			}
+			out = append(out, [2]int{x, y})
+		}
+	}
+	return out
+}
+
+// isRoomExit reports whether (x, y) is on the border of room and has a floor
+// neighbour outside the room, indicating a corridor connection.
+func isRoomExit(d *dungeon.Dungeon, room dungeon.Room, x, y int) bool {
+	onBorder := x == room.X || x == room.X+room.W-1 || y == room.Y || y == room.Y+room.H-1
+	if !onBorder {
+		return false
+	}
+	dirs := [4][2]int{{0, -1}, {0, 1}, {-1, 0}, {1, 0}}
+	for _, dir := range dirs {
+		nx, ny := x+dir[0], y+dir[1]
+		inRoom := nx >= room.X && nx < room.X+room.W && ny >= room.Y && ny < room.Y+room.H
+		if !inRoom && d.IsWalkable(nx, ny) {
+			return true
+		}
+	}
+	return false
 }
 
 // potionAt returns the untaken pickup at (x, y), or nil.

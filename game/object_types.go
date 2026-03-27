@@ -1,6 +1,9 @@
 package game
 
-import "image/color"
+import (
+	"image/color"
+	"math/rand"
+)
 
 // Predefined object type definitions.
 var (
@@ -26,6 +29,18 @@ var (
 		FallbackColor:    color.RGBA{180, 160, 100, 255},
 		SpritesheetPath:  "assets/map/map_objects.png",
 		SpritesheetIndex: 0,
+	}
+	// ObjectTypeShelf is placed against walls only; spawned separately from AllObjectTypes.
+	ObjectTypeShelf = &ObjectType{
+		Name:                 "Shelf",
+		Openable:             true,
+		FallbackColor:        color.RGBA{160, 130, 90, 255},
+		SpritesheetPath:      "assets/map/map_objects.png",
+		SpritesheetIndex:     1,
+		SkipOpeningAnimation: true,
+		Loot: func(_ *rand.Rand) []*Item {
+			return []*Item{ItemSmallHealthPotion}
+		},
 	}
 )
 

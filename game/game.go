@@ -21,19 +21,17 @@ const (
 )
 
 var (
-	colorWall   = color.RGBA{40, 44, 52, 255}
-	colorFloor  = color.RGBA{60, 64, 72, 255}
 	colorPlayer = color.RGBA{152, 195, 121, 255}
 	colorEnemy  = color.RGBA{224, 108, 117, 255}
 )
 
 // Game implements ebiten.Game.
 type Game struct {
-	dungeon  *dungeon.Dungeon
-	player   *Player
-	enemies  []*Enemy
-	cameraX  float64
-	cameraY  float64
+	dungeon                                                       *dungeon.Dungeon
+	player                                                        *Player
+	enemies                                                       []*Enemy
+	cameraX                                                       float64
+	cameraY                                                       float64
 	holdFramesUp, holdFramesDown, holdFramesLeft, holdFramesRight int
 
 	potions []*Potion
@@ -54,9 +52,9 @@ type Game struct {
 	floormap   *Spritesheet      // source for floor tiles (2×2 sheet)
 	wallTiles  [16]*ebiten.Image // autotile sprites indexed by neighbor mask (1=up,2=left,4=right,8=down)
 	floorTiles [9]*ebiten.Image  // lazily extracted on first draw
-	playerImg    *ebiten.Image
-	enemyImg     *ebiten.Image
-	objectImg    *ebiten.Image // shared spritesheet for animated chest types
+	playerImg  *ebiten.Image
+	enemyImg   *ebiten.Image
+	objectImg  *ebiten.Image // shared spritesheet for animated chest types
 }
 
 // Layout returns the logical screen size.

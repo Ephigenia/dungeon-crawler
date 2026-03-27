@@ -40,18 +40,23 @@ func loadEnemyImages(assets fs.FS) {
 	}
 }
 
+// allObjectTypes returns AllObjectTypes plus any types not in the spawnable pool.
+func allObjectTypes() []*ObjectType {
+	return append(AllObjectTypes, ObjectTypeShelf)
+}
+
 // loadObjectImages loads standalone sprites for all object types from the embedded FS.
 // Types that use the shared spritesheet (UsesSpritesheet == true) are skipped.
 func loadObjectImages(assets fs.FS) {
-	for _, ot := range AllObjectTypes {
+	for _, ot := range allObjectTypes() {
 		if ot.UsesSpritesheet {
 			continue
 		}
 		if ot.SpritesheetPath != "" {
 			sheet := loadImageFile(assets, ot.SpritesheetPath)
 			if sheet != nil {
-				y := ot.SpritesheetIndex * TileSize
-				ot.Image = sheet.SubImage(image.Rect(0, y, TileSize, y+TileSize)).(*ebiten.Image)
+				x := ot.SpritesheetIndex * TileSize
+				ot.Image = sheet.SubImage(image.Rect(x, 0, x+TileSize, TileSize)).(*ebiten.Image)
 			}
 			continue
 		}

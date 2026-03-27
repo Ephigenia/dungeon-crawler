@@ -233,6 +233,7 @@ game/
 - [ ] map: wall decorations
 - [ ] player: stats vs. attributes (attributes long term development, stats short term)
 - [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
+- [ ] QoC: object, items reference instance of spreadsheet (name, index)
 - [ ] QoC: abstraction for tilemaps
 - [ ] QoC: abstraction for tilemaps with animations
 - [ ] QoL: multiple items on the floor, "a" to get them all
