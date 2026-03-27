@@ -12,10 +12,10 @@ func (g *Game) updateEnemies() {
 		if e.moveTick > 0 {
 			continue
 		}
-		e.moveTick = enemyMoveInterval
+		e.moveTick = e.Type.MoveInterval
 
 		dist := iabs(g.player.X-e.X) + iabs(g.player.Y-e.Y)
-		if dist <= enemyChaseRange {
+		if dist <= e.Type.VisionRange {
 			e.state = enemyStateChase
 		} else {
 			e.state = enemyStateIdle

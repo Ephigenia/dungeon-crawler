@@ -10,12 +10,14 @@ import (
 // Instances on the map are represented by Enemy, which holds a pointer to its type
 // plus mutable runtime state (current HP, position).
 type EnemyType struct {
-	Name      string
-	MaxHP     int
-	Attack    int
-	Defense   int
-	ImagePath string        // asset path for the sprite; empty = use color fallback
-	Image     *ebiten.Image // loaded at startup from ImagePath; nil until then
+	Name         string
+	MaxHP        int
+	Attack       int
+	Defense      int
+	MoveInterval int           // frames between moves; lower = faster
+	VisionRange  int           // Manhattan distance at which the enemy starts chasing
+	ImagePath    string        // asset path for the sprite; empty = use color fallback
+	Image        *ebiten.Image // loaded at startup from ImagePath; nil until then
 }
 
 type enemyState int
@@ -25,10 +27,6 @@ const (
 	enemyStateChase
 )
 
-const (
-	enemyMoveInterval = 15 // frames between enemy moves (~4/sec at 60fps)
-	enemyChaseRange   = 8  // Manhattan distance that triggers chase
-)
 
 // Enemy is a live enemy on the map.
 type Enemy struct {

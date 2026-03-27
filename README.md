@@ -208,7 +208,6 @@ game/
 - [ ] enemies: spawn positions
 - [ ] enemies: visualize difficulty
 - [ ] enemies: wayfinding
-- [ ] enemies: should not be allowed to walk across chests
 - [ ] fight: different attack modes?
 - [ ] fight: range?
 - [ ] fight: critical chance
