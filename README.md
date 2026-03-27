@@ -201,6 +201,8 @@ game/
 - [ ] graphics: pixel perfect font rendering
 - [ ] debug: add debug menu/command line
 - [ ] debug: include "r" which re-creates level
+- [ ] enemies: walking speed
+- [ ] enemies: looking distance
 - [ ] enemies: sensor based follow (https://www.lexaloffle.com/bbs/?tid=48889)
 - [ ] enemies: attack types?
 - [ ] enemies: spawn positions
