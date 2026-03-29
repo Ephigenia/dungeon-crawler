@@ -12,6 +12,7 @@ func (g *Game) Update() error {
 	if g.combatFrames > 0 {
 		g.combatFrames--
 	}
+	g.particles.Update()
 	g.player.tickStaminaRegen()
 	g.updateEnemies()
 	for _, o := range g.objects {
@@ -173,10 +174,29 @@ func (g *Game) resolveCombat(e *Enemy) {
 	if isCrit {
 		hitLine = fmt.Sprintf("CRITICAL! Hit %s for %d damage", e.Type.Name, dmg)
 	}
+
+	// Splat on the enemy.
+	offsetX := float64(ScreenW/2) - g.cameraX
+	offsetY := float64(ScreenH/2) - g.cameraY
+	ex := float32(float64(e.X*TileSize)+offsetX) + float32(TileSize)/2
+	ey := float32(float64(e.Y*TileSize)+offsetY) + float32(TileSize)/2
+	count := 8
+	if isCrit {
+		count = 18
+	}
+	g.particles.SpawnParticles(ex, ey, count, 60, 200, 100, g.rng)
+
 	if e.IsAlive() {
 		playerHpBefore := g.player.HP
 		g.player.TakeDamage(e.Type.Attack, g.rng)
 		playerDmg := playerHpBefore - g.player.HP
+
+		// Blood splat on the player when hurt.
+		if playerDmg > 0 {
+			px := float32(float64(g.player.X*TileSize)+offsetX) + float32(TileSize)/2
+			py := float32(float64(g.player.Y*TileSize)+offsetY) + float32(TileSize)/2
+			g.particles.SpawnBlood(px, py, 8, g.rng)
+		}
 		g.combatLines = []string{
 			hitLine,
 			fmt.Sprintf("%s  %d / %d HP", e.Type.Name, e.HP, e.Type.MaxHP),

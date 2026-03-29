@@ -40,6 +40,7 @@ type Game struct {
 
 	combatLines  []string
 	combatFrames int
+	particles    ParticleSystem
 
 	inventoryOpen   bool
 	inventoryFocus  bool // true = item grid, false = equipment slots

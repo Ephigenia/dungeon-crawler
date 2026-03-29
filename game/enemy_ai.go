@@ -107,6 +107,16 @@ func (g *Game) resolveEnemyAttack(e *Enemy) {
 	hpBefore := g.player.HP
 	g.player.TakeDamage(e.Type.Attack, g.rng)
 	dmg := hpBefore - g.player.HP
+	if dmg > 0 {
+		offsetX := float64(ScreenW/2) - g.cameraX
+		offsetY := float64(ScreenH/2) - g.cameraY
+		px := float32(float64(g.player.X*TileSize)+offsetX) + float32(TileSize)/2
+		py := float32(float64(g.player.Y*TileSize)+offsetY) + float32(TileSize)/2
+		g.particles.SpawnBlood(px, py, 8, g.rng)
+		ex := float32(float64(e.X*TileSize)+offsetX) + float32(TileSize)/2
+		ey := float32(float64(e.Y*TileSize)+offsetY) + float32(TileSize)/2
+		g.particles.SpawnParticles(ex, ey, 6, 60, 200, 100, g.rng)
+	}
 
 	chance := g.counterChance()
 	countered := g.rng.Intn(100) < chance

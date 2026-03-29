@@ -14,6 +14,7 @@ import (
 // Draw renders the dungeon, entities, HUD, and any open UI overlays.
 func (g *Game) Draw(screen *ebiten.Image) {
 	g.drawWorld(screen)
+	g.particles.Draw(screen)
 	g.drawHUD(screen)
 	g.drawCombatNotification(screen)
 
