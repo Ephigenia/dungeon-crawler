@@ -3,6 +3,7 @@ package game
 import (
 	"fmt"
 	"image/color"
+	"math"
 
 	"github.com/hajimehoshi/ebiten/v2"
 )
@@ -32,6 +33,54 @@ type Item struct {
 	Power     int                  // weapon attack power, added to player.Attack only on hit
 	Speed     int                  // weapon attack speed (higher = faster)
 	OnUse     func(p *Player) bool // returns true if the item is consumed on use
+
+	// Durability: MaxDurability 0 means indestructible (consumables, etc.)
+	// DurabilityLossRate is subtracted from Durability each time the item is used.
+	MaxDurability      int
+	DurabilityLossRate float64
+}
+
+// durabilityExponent is the power curve exponent so that 50% durability → 75% power.
+// Derived from: 0.5^a = 0.75 → a = log(0.75)/log(0.5).
+var durabilityExponent = math.Log(0.75) / math.Log(0.5)
+
+// ItemInstance is a live equipped or carried item with its own durability state.
+// Multiple slots may not share the same instance; the inventory slot and equipment
+// slot both point to the same *ItemInstance so durability changes are reflected everywhere.
+type ItemInstance struct {
+	Type      *Item
+	Durability float64 // current durability; starts at Type.MaxDurability
+}
+
+// newItemInstance creates a fresh instance at full durability.
+func newItemInstance(item *Item) *ItemInstance {
+	return &ItemInstance{Type: item, Durability: float64(item.MaxDurability)}
+}
+
+// DurabilityPct returns durability as a fraction in [0, 1].
+// Returns 1 for indestructible items (MaxDurability == 0).
+func (inst *ItemInstance) DurabilityPct() float64 {
+	if inst.Type.MaxDurability == 0 {
+		return 1.0
+	}
+	pct := inst.Durability / float64(inst.Type.MaxDurability)
+	if pct < 0 {
+		return 0
+	}
+	if pct > 1 {
+		return 1
+	}
+	return pct
+}
+
+// EffectivePower returns a [0,1] multiplier for attack/defense contributions.
+// The curve is exponential: 100% → 1.0, 50% → 0.75, 0% → 0.
+func (inst *ItemInstance) EffectivePower() float64 {
+	pct := inst.DurabilityPct()
+	if pct <= 0 {
+		return 0
+	}
+	return math.Pow(pct, durabilityExponent)
 }
 
 // FitsSlot reports whether the item can be placed in the given slot.

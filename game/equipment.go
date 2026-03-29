@@ -72,11 +72,11 @@ type StatModifiers struct {
 	InvWeight  float64 // extra carry weight in kg
 }
 
-// Equipment tracks the item equipped in each slot.
+// Equipment tracks the item instance equipped in each slot.
 type Equipment struct {
-	Slots map[EquipmentSlot]*Item
+	Slots map[EquipmentSlot]*ItemInstance
 }
 
 func newEquipment() *Equipment {
-	return &Equipment{Slots: make(map[EquipmentSlot]*Item)}
+	return &Equipment{Slots: make(map[EquipmentSlot]*ItemInstance)}
 }

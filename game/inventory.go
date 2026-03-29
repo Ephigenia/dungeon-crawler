@@ -1,9 +1,9 @@
 package game
 
-// InventorySlot holds one item type and its stack count.
+// InventorySlot holds one item instance and its stack count.
 type InventorySlot struct {
-	Item  *Item
-	Count int
+	Instance *ItemInstance
+	Count    int
 }
 
 // Inventory holds the items a player is carrying and enforces weight/slot limits.
@@ -24,7 +24,7 @@ func newInventory() *Inventory {
 func (inv *Inventory) CurrentWeight() float64 {
 	w := 0.0
 	for _, slot := range inv.Items {
-		w += slot.Item.Weight * float64(slot.Count)
+		w += slot.Instance.Type.Weight * float64(slot.Count)
 	}
 	return w
 }
@@ -36,7 +36,7 @@ func (inv *Inventory) CanAdd(item *Item) bool {
 	// Stackable: check for an existing slot with room.
 	if item.MaxStack > 1 {
 		for _, slot := range inv.Items {
-			if slot.Item == item && slot.Count < item.MaxStack {
+			if slot.Instance.Type == item && slot.Count < item.MaxStack {
 				return true
 			}
 		}
@@ -53,11 +53,12 @@ func (inv *Inventory) CanAdd(item *Item) bool {
 
 // Add adds the item to the inventory. Returns false if limits would be exceeded.
 // Stackable items are merged into an existing partial slot when possible.
+// A fresh ItemInstance is created for each new slot.
 func (inv *Inventory) Add(item *Item) bool {
 	// Try to merge into an existing stack first.
 	if item.MaxStack > 1 {
 		for _, slot := range inv.Items {
-			if slot.Item == item && slot.Count < item.MaxStack {
+			if slot.Instance.Type == item && slot.Count < item.MaxStack {
 				slot.Count++
 				return true
 			}
@@ -66,7 +67,7 @@ func (inv *Inventory) Add(item *Item) bool {
 	if !inv.CanAdd(item) {
 		return false
 	}
-	inv.Items = append(inv.Items, &InventorySlot{Item: item, Count: 1})
+	inv.Items = append(inv.Items, &InventorySlot{Instance: newItemInstance(item), Count: 1})
 	return true
 }
 

@@ -46,8 +46,8 @@ func newPlayer(x, y int) *Player {
 		BaseAttack:     5,
 		BaseDefense:    2,
 		BaseAgility:    5,
-		BaseMaxStamina: 20,
-		Stamina:        20,
+		BaseMaxStamina: 40,
+		Stamina:        40,
 		Level:          1,
 		EXP:            0,
 		NextLevelEXP:   100,
@@ -59,17 +59,19 @@ func newPlayer(x, y int) *Player {
 // equipmentStatMods returns the cumulative stat modifiers of all equipped items.
 func (p *Player) equipmentStatMods() StatModifiers {
 	var total StatModifiers
-	for _, item := range p.Equipment.Slots {
-		if item != nil {
-			total.Attack += item.StatMods.Attack
-			total.Defense += item.StatMods.Defense
-			total.Agility += item.StatMods.Agility
-			total.HP += item.StatMods.HP
-			total.AttackPct += item.StatMods.AttackPct
-			total.DefensePct += item.StatMods.DefensePct
-			total.AgilityPct += item.StatMods.AgilityPct
-			total.HPPct += item.StatMods.HPPct
+	for _, inst := range p.Equipment.Slots {
+		if inst == nil {
+			continue
 		}
+		pow := inst.EffectivePower()
+		total.Attack += int(float64(inst.Type.StatMods.Attack) * pow)
+		total.Defense += int(float64(inst.Type.StatMods.Defense) * pow)
+		total.Agility += inst.Type.StatMods.Agility
+		total.HP += inst.Type.StatMods.HP
+		total.AttackPct += inst.Type.StatMods.AttackPct
+		total.DefensePct += inst.Type.StatMods.DefensePct
+		total.AgilityPct += inst.Type.StatMods.AgilityPct
+		total.HPPct += inst.Type.StatMods.HPPct
 	}
 	return total
 }
@@ -152,12 +154,13 @@ func (p *Player) applyStatMods(mods StatModifiers, sign int) {
 	}
 }
 
-// WeaponPower returns the combined Power of all items in weapon slots.
+// WeaponPower returns the combined effective Power of all items in weapon slots,
+// scaled by each weapon's durability.
 func (p *Player) WeaponPower() int {
 	power := 0
 	for _, slot := range []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon} {
-		if item := p.Equipment.Slots[slot]; item != nil {
-			power += item.Power
+		if inst := p.Equipment.Slots[slot]; inst != nil {
+			power += int(float64(inst.Type.Power) * inst.EffectivePower())
 		}
 	}
 	return power
@@ -167,17 +170,17 @@ func (p *Player) WeaponPower() int {
 func (p *Player) WeaponSpeed() int {
 	speed := 0
 	for _, slot := range []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon} {
-		if item := p.Equipment.Slots[slot]; item != nil && item.Speed > speed {
-			speed = item.Speed
+		if inst := p.Equipment.Slots[slot]; inst != nil && inst.Type.Speed > speed {
+			speed = inst.Type.Speed
 		}
 	}
 	return speed
 }
 
-// IsEquipped reports whether item is currently equipped in any slot.
-func (p *Player) IsEquipped(item *Item) bool {
+// IsEquipped reports whether the given instance is currently equipped in any slot.
+func (p *Player) IsEquipped(inst *ItemInstance) bool {
 	for _, equipped := range p.Equipment.Slots {
-		if equipped == item {
+		if equipped == inst {
 			return true
 		}
 	}
@@ -192,39 +195,86 @@ func (p *Player) Equip(invIdx int) bool {
 	if invIdx >= len(inv.Items) {
 		return false
 	}
-	item := inv.Items[invIdx].Item
-	if len(item.Slots) == 0 {
+	inst := inv.Items[invIdx].Instance
+	if len(inst.Type.Slots) == 0 {
 		return false
 	}
 	// Prefer an empty slot; fall back to the first candidate.
-	target := item.Slots[0]
-	for _, s := range item.Slots {
+	target := inst.Type.Slots[0]
+	for _, s := range inst.Type.Slots {
 		if p.Equipment.Slots[s] == nil {
 			target = s
 			break
 		}
 	}
 	if old := p.Equipment.Slots[target]; old != nil {
-		p.applyStatMods(old.StatMods, -1)
+		p.applyStatMods(old.Type.StatMods, -1)
 	}
-	p.Equipment.Slots[target] = item
-	p.applyStatMods(item.StatMods, 1)
+	p.Equipment.Slots[target] = inst
+	p.applyStatMods(inst.Type.StatMods, 1)
 	return true
 }
 
 // Unequip removes the item from the given slot. The item stays in inventory.
 func (p *Player) Unequip(slot EquipmentSlot) bool {
-	item := p.Equipment.Slots[slot]
-	if item == nil {
+	inst := p.Equipment.Slots[slot]
+	if inst == nil {
 		return false
 	}
-	p.applyStatMods(item.StatMods, -1)
+	p.applyStatMods(inst.Type.StatMods, -1)
 	p.Equipment.Slots[slot] = nil
 	// Re-clamp HP now that the effective cap may have dropped.
 	if p.HP > p.EffectiveMaxHP() {
 		p.HP = p.EffectiveMaxHP()
 	}
 	return true
+}
+
+// durabilityLossFactor returns a [0.5, 1.0] multiplier for durability loss,
+// reduced by 2% per level so higher-level players wear items down more slowly.
+func (p *Player) durabilityLossFactor() float64 {
+	factor := 1.0 - float64(p.Level-1)*0.02
+	if factor < 0.5 {
+		factor = 0.5
+	}
+	return factor
+}
+
+// reduceItemDurability subtracts scaled durability loss from inst, clamped to 0.
+func (p *Player) reduceItemDurability(inst *ItemInstance) {
+	if inst == nil || inst.Type.MaxDurability == 0 {
+		return
+	}
+	loss := inst.Type.DurabilityLossRate * p.durabilityLossFactor()
+	inst.Durability -= loss
+	if inst.Durability < 0 {
+		inst.Durability = 0
+	}
+}
+
+// WearWeapons reduces durability of equipped weapons (items with Power > 0 in weapon slots).
+// Called after each player attack.
+func (p *Player) WearWeapons() {
+	for _, slot := range []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon} {
+		if inst := p.Equipment.Slots[slot]; inst != nil && inst.Type.Power > 0 {
+			p.reduceItemDurability(inst)
+		}
+	}
+}
+
+// WearArmor reduces durability of equipped armor and shields.
+// Called after the player takes damage.
+func (p *Player) WearArmor() {
+	for slot, inst := range p.Equipment.Slots {
+		if inst == nil {
+			continue
+		}
+		isWeaponSlot := slot == SlotLeftWeapon || slot == SlotRightWeapon
+		isShield := isWeaponSlot && inst.Type.Power == 0
+		if !isWeaponSlot || isShield {
+			p.reduceItemDurability(inst)
+		}
+	}
 }
 
 // levelUp increases the player's level and improves all base stats.
@@ -267,11 +317,17 @@ func (p *Player) IsAlive() bool {
 	return p.HP > 0
 }
 
-// TakeDamage reduces HP using the shared damage formula.
+// TakeDamage reduces HP using the shared damage formula and wears down armor.
+// When the player is out of stamina they cannot defend and take full damage.
 func (p *Player) TakeDamage(attack int, rng *rand.Rand) {
-	dmg := calcDamage(attack, p.EffectiveDefense(), rng)
+	defense := p.EffectiveDefense()
+	if p.Stamina <= 0 {
+		defense = 0
+	}
+	dmg := calcDamage(attack, defense, rng)
 	p.HP -= dmg
 	if p.HP < 0 {
 		p.HP = 0
 	}
+	p.WearArmor()
 }

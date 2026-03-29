@@ -115,7 +115,7 @@ func (g *Game) Update() error {
 		}
 	}
 
-	if dx != 0 || dy != 0 {
+	if (dx != 0 || dy != 0) && g.player.Stamina > 0 {
 		nx, ny := g.player.X+dx, g.player.Y+dy
 		if e := g.enemyAt(nx, ny); e != nil {
 			g.resolveCombat(e)
@@ -162,6 +162,7 @@ func (g *Game) resolveCombat(e *Enemy) {
 		e.HP = 0
 	}
 	dmg = hpBefore - e.HP
+	g.player.WearWeapons()
 	g.player.AddEXP(5)
 
 	if e.IsAlive() {
@@ -227,19 +228,19 @@ func (g *Game) updateInventoryItems() {
 
 	usePressed := inpututil.IsKeyJustPressed(ebiten.KeyU) || inpututil.IsKeyJustPressed(ebiten.KeyEnter)
 	if usePressed && g.inventoryCursor < len(inv.Items) {
-		item := inv.Items[g.inventoryCursor].Item
-		switch item.Category {
+		inst := inv.Items[g.inventoryCursor].Instance
+		switch inst.Type.Category {
 		case CategoryConsumable:
-			if item.OnUse != nil && item.OnUse(g.player) {
+			if inst.Type.OnUse != nil && inst.Type.OnUse(g.player) {
 				inv.Consume(g.inventoryCursor)
 				if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 					g.inventoryCursor--
 				}
 			}
 		case CategoryEquipment:
-			if g.player.IsEquipped(item) {
+			if g.player.IsEquipped(inst) {
 				for _, slot := range EquipmentSlotOrder {
-					if g.player.Equipment.Slots[slot] == item {
+					if g.player.Equipment.Slots[slot] == inst {
 						g.player.Unequip(slot)
 						break
 					}
@@ -251,8 +252,8 @@ func (g *Game) updateInventoryItems() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyX) && g.inventoryCursor < len(inv.Items) {
-		item := inv.Items[g.inventoryCursor].Item
-		if !g.player.IsEquipped(item) {
+		inst := inv.Items[g.inventoryCursor].Instance
+		if !g.player.IsEquipped(inst) {
 			inv.Consume(g.inventoryCursor)
 			if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 				g.inventoryCursor--
@@ -261,9 +262,9 @@ func (g *Game) updateInventoryItems() {
 	}
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyD) && g.inventoryCursor < len(inv.Items) {
-		item := inv.Items[g.inventoryCursor].Item
-		if !g.player.IsEquipped(item) {
-			g.potions = append(g.potions, &Potion{X: g.player.X, Y: g.player.Y, Item: item})
+		inst := inv.Items[g.inventoryCursor].Instance
+		if !g.player.IsEquipped(inst) {
+			g.potions = append(g.potions, &Potion{X: g.player.X, Y: g.player.Y, Item: inst.Type})
 			inv.Consume(g.inventoryCursor)
 			if g.inventoryCursor >= len(inv.Items) && g.inventoryCursor > 0 {
 				g.inventoryCursor--

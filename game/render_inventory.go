@@ -78,14 +78,21 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 			borderCol := color.RGBA{80, 88, 108, 255}
 			if idx < len(inv.Items) {
 				slot := inv.Items[idx]
-				item := slot.Item
-				drawItemSprite(screen, item, sx, sy, slotSize, 2)
+				inst := slot.Instance
+				drawItemSprite(screen, inst.Type, sx, sy, slotSize, 2)
 				if slot.Count > 1 {
 					countStr := fmt.Sprintf("%d", slot.Count)
 					text.Draw(screen, countStr, g.hudFont, int(sx)+slotSize-len(countStr)*4, int(sy)+slotSize-1, color.RGBA{255, 255, 200, 255})
 				}
-				if g.player.IsEquipped(item) {
+				if g.player.IsEquipped(inst) {
 					borderCol = color.RGBA{220, 200, 60, 255}
+				}
+				if inst.Type.MaxDurability > 0 {
+					if inst.DurabilityPct() <= 0 {
+						borderCol = color.RGBA{200, 60, 60, 255}
+					}
+					barH := float32(slotSize) * float32(inst.DurabilityPct())
+					vector.DrawFilledRect(screen, sx+float32(slotSize)-2, sy+float32(slotSize)-barH, 2, barH, color.RGBA{80, 180, 220, 255}, false)
 				}
 			}
 			if selected {
@@ -149,11 +156,15 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 
 		equipped := g.player.Equipment.Slots[slot]
 		if equipped != nil {
-			drawItemSprite(screen, equipped, float32(colSwatch), float32(ey-8), 6, 0)
-			text.Draw(screen, equipped.ID, g.hudFont, colName, ey, equipped.Color)
-			text.Draw(screen, fmt.Sprintf("%.1fkg", equipped.Weight), g.hudFont, colWeight, ey, dim)
-			if equipped.Effect != "" {
-				text.Draw(screen, equipped.Effect, g.hudFont, colEffect, ey, green)
+			drawItemSprite(screen, equipped.Type, float32(colSwatch), float32(ey-8), 6, 0)
+			nameCol := equipped.Type.Color
+			if equipped.Type.MaxDurability > 0 && equipped.DurabilityPct() <= 0 {
+				nameCol = color.RGBA{200, 60, 60, 255}
+			}
+			text.Draw(screen, equipped.Type.ID, g.hudFont, colName, ey, nameCol)
+			text.Draw(screen, fmt.Sprintf("%.1fkg", equipped.Type.Weight), g.hudFont, colWeight, ey, dim)
+			if equipped.Type.Effect != "" {
+				text.Draw(screen, equipped.Type.Effect, g.hudFont, colEffect, ey, green)
 			}
 		} else {
 			text.Draw(screen, "(empty)", g.hudFont, colName, ey, color.RGBA{70, 70, 70, 255})
@@ -172,18 +183,22 @@ func (g *Game) drawInventory(screen *ebiten.Image) {
 func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, panelY int,
 	white, dim, green, yellow, red color.RGBA) {
 
-	var selectedItem *Item
+	var selectedInst *ItemInstance
 	var selectedSlot *InventorySlot
 	var fromEquipment bool
 	if g.inventoryFocus {
 		if g.inventoryCursor < len(inv.Items) {
 			selectedSlot = inv.Items[g.inventoryCursor]
-			selectedItem = selectedSlot.Item
+			selectedInst = selectedSlot.Instance
 		}
 	} else {
 		slot := EquipmentSlotOrder[g.equipmentCursor]
-		selectedItem = g.player.Equipment.Slots[slot]
+		selectedInst = g.player.Equipment.Slots[slot]
 		fromEquipment = true
+	}
+	var selectedItem *Item
+	if selectedInst != nil {
+		selectedItem = selectedInst.Type
 	}
 
 	dy := panelY + 10
@@ -255,6 +270,18 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 		dy += 14
 	}
 
+	if selectedItem.MaxDurability > 0 {
+		durCol := color.RGBA{80, 180, 220, 255}
+		if selectedInst.DurabilityPct() <= 0 {
+			durCol = color.RGBA{200, 60, 60, 255}
+		}
+		text.Draw(screen, fmt.Sprintf("Durability: %d / %d", int(selectedInst.Durability), selectedItem.MaxDurability),
+			g.hudFont, x, dy, durCol)
+		drawStatBar(screen, float32(x+110), float32(dy-9), 80, int(selectedInst.Durability), selectedItem.MaxDurability,
+			color.RGBA{20, 40, 50, 220}, color.RGBA{80, 180, 220, 255})
+		dy += 14
+	}
+
 	dy += 4
 	if fromEquipment {
 		text.Draw(screen, "[U/Enter] Unequip", g.hudFont, x, dy, yellow)
@@ -264,7 +291,7 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 	case CategoryConsumable:
 		text.Draw(screen, "[U/Enter] Use    [D] Drop    [X] Destroy", g.hudFont, x, dy, yellow)
 	case CategoryEquipment:
-		if g.player.IsEquipped(selectedItem) {
+		if g.player.IsEquipped(selectedInst) {
 			text.Draw(screen, "[U/Enter] Unequip", g.hudFont, x, dy, yellow)
 		} else {
 			text.Draw(screen, "[U/Enter] Equip  [D] Drop   [X] Destroy", g.hudFont, x, dy, yellow)
