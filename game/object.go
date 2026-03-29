@@ -42,6 +42,12 @@ type ObjectType struct {
 	// The player destroys them by bumping into them.
 	Destructable bool
 	MaxHP        int
+
+	// DestroyedSpritesheetIndex, when HasDestroyedSprite is true, selects the
+	// column in SpritesheetPath to use when the object is destroyed.
+	HasDestroyedSprite      bool
+	DestroyedSpritesheetIndex int
+	DestroyedImage          *ebiten.Image
 }
 
 // ObjectState drives which animation frame / spritesheet column is shown.

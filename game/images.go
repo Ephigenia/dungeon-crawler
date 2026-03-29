@@ -55,8 +55,18 @@ func loadObjectImages(assets fs.FS) {
 		if ot.SpritesheetPath != "" {
 			sheet := loadImageFile(assets, ot.SpritesheetPath)
 			if sheet != nil {
-				x := ot.SpritesheetIndex * TileSize
-				ot.Image = sheet.SubImage(image.Rect(x, 0, x+TileSize, TileSize)).(*ebiten.Image)
+				cols := sheet.Bounds().Dx() / TileSize
+				spriteRect := func(idx int) image.Rectangle {
+					col := idx % cols
+					row := idx / cols
+					x := col * TileSize
+					y := row * TileSize
+					return image.Rect(x, y, x+TileSize, y+TileSize)
+				}
+				ot.Image = sheet.SubImage(spriteRect(ot.SpritesheetIndex)).(*ebiten.Image)
+				if ot.HasDestroyedSprite {
+					ot.DestroyedImage = sheet.SubImage(spriteRect(ot.DestroyedSpritesheetIndex)).(*ebiten.Image)
+				}
 			}
 			continue
 		}

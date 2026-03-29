@@ -103,6 +103,15 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 
 	for _, o := range g.objects {
 		if o.Destroyed {
+			if o.Type.DestroyedImage != nil {
+				ox := float64(o.X*TileSize) + offsetX
+				oy := float64(o.Y*TileSize) + offsetY
+				iw, ih := o.Type.DestroyedImage.Bounds().Dx(), o.Type.DestroyedImage.Bounds().Dy()
+				op.GeoM.Reset()
+				op.GeoM.Scale(float64(TileSize)/float64(iw), float64(TileSize)/float64(ih))
+				op.GeoM.Translate(ox, oy)
+				screen.DrawImage(o.Type.DestroyedImage, &op)
+			}
 			continue
 		}
 		ox := float64(o.X*TileSize) + offsetX
@@ -195,7 +204,7 @@ func (g *Game) drawHUD(screen *ebiten.Image) {
 		g.hudFont, 4, hudY, dim)
 }
 
-// drawCombatNotification renders the centered combat result box for combatFrames.
+// drawCombatNotification renders the combat result box at the bottom of the screen for combatFrames.
 func (g *Game) drawCombatNotification(screen *ebiten.Image) {
 	if g.combatFrames <= 0 {
 		return
@@ -204,7 +213,7 @@ func (g *Game) drawCombatNotification(screen *ebiten.Image) {
 	boxW := float32(220)
 	boxH := float32(len(g.combatLines)*lineH + 16)
 	boxX := float32(ScreenW)/2 - boxW/2
-	boxY := float32(ScreenH)/2 - boxH/2
+	boxY := float32(ScreenH) - boxH - 8
 	border := color.RGBA{100, 110, 140, 255}
 
 	vector.DrawFilledRect(screen, boxX, boxY, boxW, boxH, color.RGBA{20, 22, 30, 220}, false)
