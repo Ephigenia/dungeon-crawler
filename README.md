@@ -206,7 +206,6 @@ game/
 - [ ] general: non-grid movement, move by pixels and not grid positions
 - [ ] graphics: high-resolution images
 - [ ] graphics: pixel perfect font rendering
-- [ ] items: durability for weapons
 - [ ] items: modifier target: player, enemy
 - [ ] items: rarities (influencing the stats and positively increasing stats)
 - [ ] items: requirements for equipping items
@@ -214,5 +213,3 @@ game/
 - [ ] map: generation algorithms
 - [ ] map: room & floor decorations, corners, shaped walls, traps, doors, secrets
 - [ ] QoC: object, items reference instance of spreadsheet (name, index)
-- [ ] QoL: multiple items on the floor, "a" to get them all
-- [ ] QoL: multiple items on the floor, "p" opens interface to select which one to take, a (all)

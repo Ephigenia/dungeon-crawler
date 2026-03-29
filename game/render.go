@@ -153,6 +153,7 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 		screen.DrawImage(eImg, &op)
 		drawStatBar(screen, float32(ex), float32(ey)+PlayerSize+1, PlayerSize, e.HP, e.Type.MaxHP,
 			color.RGBA{30, 30, 30, 200}, color.RGBA{224, 108, 117, 255})
+		vector.DrawFilledRect(screen, float32(ex)+PlayerSize-3, float32(ey), 3, 3, dangerColor(calcEnemyDangerLevel(e, g.player)), false)
 	}
 
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
@@ -252,6 +253,20 @@ func drawItemSprite(screen *ebiten.Image, item *Item, x, y, size, inset float32)
 		screen.DrawImage(item.Image, iop)
 	} else {
 		vector.DrawFilledRect(screen, x+inset, y+inset, size-inset*2, size-inset*2, item.Color, false)
+	}
+}
+
+// dangerColor maps a DangerLevel (1–4) to an indicator color.
+func dangerColor(level int) color.RGBA {
+	switch level {
+	case 1:
+		return color.RGBA{100, 210, 100, 255} // green — easy
+	case 2:
+		return color.RGBA{230, 210, 60, 255} // yellow — moderate
+	case 3:
+		return color.RGBA{230, 130, 40, 255} // orange — hard
+	default:
+		return color.RGBA{210, 50, 50, 255} // red — deadly
 	}
 }
 

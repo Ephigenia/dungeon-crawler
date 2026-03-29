@@ -1,6 +1,7 @@
 package game
 
 import (
+	"math"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -73,6 +74,35 @@ func calcPlayerDamage(baseAttack, weaponPower, weaponSpeed, agility, level, defe
 		dmg = 0
 	}
 	return dmg
+}
+
+// calcEnemyDangerLevel computes a 1–4 danger rating for an enemy relative to the player.
+// It estimates average hits-to-kill in both directions and uses the ratio as a danger score.
+func calcEnemyDangerLevel(e *Enemy, p *Player) int {
+	defense := p.EffectiveDefense()
+	var avgEnemyDmg float64
+	if defense <= 0 {
+		avgEnemyDmg = float64(e.Type.Attack)
+	} else {
+		avgEnemyDmg = float64(e.Type.Attack) * float64(e.Type.Attack) / float64(e.Type.Attack+defense)
+	}
+	playerDmg := p.EffectiveAttack() + p.WeaponPower() - e.Type.Defense
+	if playerDmg < 1 {
+		playerDmg = 1
+	}
+	hitsToKillPlayer := float64(p.HP) / math.Max(1, avgEnemyDmg)
+	hitsToKillEnemy := float64(e.Type.MaxHP) / float64(playerDmg)
+	dangerScore := hitsToKillEnemy / hitsToKillPlayer
+	switch {
+	case dangerScore < 0.15:
+		return 1
+	case dangerScore < 0.4:
+		return 2
+	case dangerScore < 0.8:
+		return 3
+	default:
+		return 4
+	}
 }
 
 // calcDamage returns the damage dealt given an attack and defense value.
