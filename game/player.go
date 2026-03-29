@@ -3,13 +3,15 @@ package game
 import (
 	"math"
 	"math/rand"
+
+	"github.com/hajimehoshi/ebiten/v2"
 )
 
 const (
 	xpBase     = 100
 	xpExponent = 1.5
 
-	staminaRegenInterval = 30 // frames between passive regen ticks (~2/sec at 60 fps)
+	staminaRegenInterval = ebiten.DefaultTPS / 2 // frames between passive regen ticks (~2/sec)
 	staminaCostMove      = 1
 	staminaCostAction    = 2
 )
@@ -122,10 +124,19 @@ func (p *Player) RestoreStamina(amount int) {
 	}
 }
 
+// staminaRegenRate returns the current frames-between-ticks, reduced by 1 per level (min 5).
+func (p *Player) staminaRegenRate() int {
+	interval := staminaRegenInterval - (p.Level - 1)
+	if interval < 5 {
+		interval = 5
+	}
+	return interval
+}
+
 // tickStaminaRegen advances the passive regen timer and restores 1 stamina when it fires.
 func (p *Player) tickStaminaRegen() {
 	p.staminaRegenTick++
-	if p.staminaRegenTick >= staminaRegenInterval {
+	if p.staminaRegenTick >= p.staminaRegenRate() {
 		p.staminaRegenTick = 0
 		p.RestoreStamina(1)
 	}

@@ -193,20 +193,16 @@ game/
 ## Ideas
 
 - [ ] general: non-grid movement, move by pixels and not grid positions
-- [ ] buffs: timed effects on items (weapons, armor, equipables)
-- [ ] buffs: timed effects on stats
+- [ ] buffs: timed effects on items & player stats (weapons, armor, equipables, books, scrolls, oils)
 - [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
 - [ ] general: general game concept
 - [ ] graphics: high-resolution images
 - [ ] graphics: pixel perfect font rendering
 - [ ] debug: add debug menu/command line
-- [ ] debug: include "r" which re-creates level
-- [ ] enemies: walking speed
-- [ ] enemies: looking distance
 - [ ] enemies: sensor based follow (https://www.lexaloffle.com/bbs/?tid=48889)
 - [ ] enemies: attack types?
 - [ ] enemies: spawn positions
-- [ ] enemies: visualize difficulty
+- [ ] enemies: visualize difficulty?
 - [ ] enemies: wayfinding
 - [ ] fight: different attack modes?
 - [ ] fight: range?
@@ -217,20 +213,11 @@ game/
 - [ ] items: modifier target: player, enemy
 - [ ] items: rarities (influencing the stats and positively increasing stats)
 - [ ] items: requirements for equipping items
-- [ ] items: consumable books, affect abilities
 - [ ] map: 47 floor tileset
-- [ ] map: floor decorations
-- [ ] map: room decorations, corners, shaped walls
-- [ ] map: traps
-- [ ] map: doors
-- [ ] map: destructable objects, not walkable but attackable, have health-points and spawn items on destruction
+- [ ] map: room & floor decorations, corners, shaped walls, traps, doors, secrets
 - [ ] map: secrets (walk next to secrets to discover)
 - [ ] map: generation algorithms
 - [ ] map: item spawn probabilties
-- [ ] map: openable items spawn probability
-- [ ] map: walkable and not walkable items, (shelf)
-- [ ] map: wall decorations
-- [ ] buff: eating system
 - [ ] player: stats vs. attributes (attributes long term development, stats short term), core attribute vs. attribute
 - [ ] player: core attributes: strength, 
 - [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
@@ -246,10 +233,15 @@ game/
 
 #### Done
 
+- [x] debug: include "r" which re-creates level
+- [x] map: walkable and not walkable items, (shelf)
+- [x] map: destructable objects, not walkable but attackable, have health-points and spawn items on destruction
 - [x] map: shelfes
 - [x] map: simple tileset floor
 - [x] map: simple tileset walls
 - [x] map: simple base map (floor/wall) graphics
+- [x] enemies: walking speed
+- [x] enemies: looking distance
 - [x] enemies: idle+chase
 - [x] debug: fps counter
 - [x] fight: how to handle attacks from enemies (counter-attacks, blocks)

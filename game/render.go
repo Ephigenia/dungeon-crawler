@@ -177,6 +177,12 @@ func (g *Game) drawHUD(screen *ebiten.Image) {
 		color.RGBA{50, 20, 20, 220}, color.RGBA{200, 60, 60, 255})
 	hudY += 12
 
+	text.Draw(screen, "STA", g.hudFont, 4, hudY, dim)
+	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.Stamina, g.player.EffectiveMaxStamina()), g.hudFont, 32, hudY, color.White)
+	drawStatBar(screen, 94, float32(hudY-9), 80, g.player.Stamina, g.player.EffectiveMaxStamina(),
+		color.RGBA{50, 45, 10, 220}, color.RGBA{220, 200, 40, 255})
+	hudY += 12
+
 	text.Draw(screen, "ATK", g.hudFont, 4, hudY, dim)
 	text.Draw(screen, fmt.Sprintf("%d / %d", g.player.BaseAttack, g.player.EffectiveAttack()+g.player.WeaponPower()), g.hudFont, 32, hudY, color.RGBA{224, 180, 100, 255})
 	hudY += 12
