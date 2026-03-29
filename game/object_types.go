@@ -15,6 +15,14 @@ var (
 		FallbackColor:   color.RGBA{180, 120, 60, 255},
 		UsesSpritesheet: true,
 		SpritesheetRow:  0,
+		Loot: func(rng *rand.Rand) []*Item {
+			count := rng.Intn(5) + 1
+			items := make([]*Item, count)
+			for i := range items {
+				items[i] = SpawnableItems[rng.Intn(len(SpawnableItems))]
+			}
+			return items
+		},
 	}
 	ObjectTypeIronChest = &ObjectType{
 		Name:            "Iron Chest",
@@ -22,6 +30,14 @@ var (
 		FallbackColor:   color.RGBA{160, 160, 170, 255},
 		UsesSpritesheet: true,
 		SpritesheetRow:  1,
+		Loot: func(rng *rand.Rand) []*Item {
+			count := rng.Intn(5) + 1
+			items := make([]*Item, count)
+			for i := range items {
+				items[i] = SpawnableItems[rng.Intn(len(SpawnableItems))]
+			}
+			return items
+		},
 	}
 	ObjectTypeVase = &ObjectType{
 		Name:             "Vase",
@@ -40,6 +56,13 @@ var (
 		MaxHP:                     3,
 		HasDestroyedSprite:        true,
 		DestroyedSpritesheetIndex: 5,
+		WalkableWhenDestroyed:     true,
+		Loot: func(rng *rand.Rand) []*Item {
+			if rng.Intn(10) != 0 {
+				return nil
+			}
+			return []*Item{SpawnableItems[rng.Intn(len(SpawnableItems))]}
+		},
 	}
 	// ObjectTypeShelf is placed against walls only; spawned separately from AllObjectTypes.
 	ObjectTypeShelf = &ObjectType{

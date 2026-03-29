@@ -19,16 +19,7 @@ func (g *Game) Update() error {
 			o.openingTick--
 			if o.openingTick <= 0 {
 				o.State = ObjectStateOpened
-				var items []*Item
-				if o.Type.Loot != nil {
-					items = o.Type.Loot(g.rng)
-				} else {
-					count := g.rng.Intn(5) + 1
-					items = make([]*Item, count)
-					for i := range items {
-						items[i] = SpawnableItems[g.rng.Intn(len(SpawnableItems))]
-					}
-				}
+				items := o.Type.Loot(g.rng)
 				for _, item := range items {
 					g.potions = append(g.potions, &Potion{X: g.player.X, Y: g.player.Y, Item: item})
 				}
@@ -146,6 +137,11 @@ func (g *Game) Update() error {
 				o.HP -= dmg
 				if o.HP <= 0 {
 					o.Destroyed = true
+					if o.Type.Loot != nil {
+						for _, item := range o.Type.Loot(g.rng) {
+							g.potions = append(g.potions, &Potion{X: o.X, Y: o.Y, Item: item})
+						}
+					}
 				}
 				g.player.SpendStamina(staminaCostAction)
 			}
@@ -311,4 +307,3 @@ func (g *Game) shouldMove(holdFrames int) bool {
 	}
 	return (holdFrames-repeatDelayFrames)%repeatIntervalFrames == 0
 }
-

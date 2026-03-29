@@ -13,8 +13,9 @@ import (
 type ObjectType struct {
 	Name             string
 	Openable         bool // player can open with O key
-	PassableByPlayer bool // player can walk onto this tile
-	PassableByEnemy  bool // enemies can walk onto this tile
+	PassableByPlayer    bool // player can walk onto this tile
+	PassableByEnemy     bool // enemies can walk onto this tile
+	WalkableWhenDestroyed bool // players and enemies can walk onto this tile after destruction
 	FallbackColor    color.RGBA // drawn when no image is available
 
 	// Standalone image (loaded from ImagePath at startup).

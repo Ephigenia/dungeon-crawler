@@ -205,7 +205,7 @@ func (g *Game) potionsAt(x, y int) []*Potion {
 // objectAt returns the non-destroyed object at (x, y), or nil.
 func (g *Game) objectAt(x, y int) *Object {
 	for _, o := range g.objects {
-		if !o.Destroyed && o.X == x && o.Y == y {
+		if o.X == x && o.Y == y && !(o.Destroyed && o.Type.WalkableWhenDestroyed) {
 			return o
 		}
 	}
