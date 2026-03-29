@@ -72,6 +72,7 @@ func (p *Player) equipmentStatMods() StatModifiers {
 		total.DefensePct += inst.Type.StatMods.DefensePct
 		total.AgilityPct += inst.Type.StatMods.AgilityPct
 		total.HPPct += inst.Type.StatMods.HPPct
+		total.CritChance += inst.Type.StatMods.CritChance * pow
 	}
 	return total
 }
@@ -103,6 +104,24 @@ func (p *Player) EffectiveDefense() int {
 func (p *Player) EffectiveAgility() int {
 	mods := p.equipmentStatMods()
 	return applyPct(p.BaseAgility+mods.Agility, mods.AgilityPct)
+}
+
+// EffectiveCritChance returns the player's critical hit probability in percent [0, 50].
+// Base: agility×0.5 + attack×0.1. Weapon CritChance and StatMod bonuses are added on top.
+func (p *Player) EffectiveCritChance() float64 {
+	base := float64(p.EffectiveAgility())*0.5 + float64(p.EffectiveAttack())*0.1
+	mods := p.equipmentStatMods()
+	base += mods.CritChance
+	for _, slot := range []EquipmentSlot{SlotRightWeapon, SlotLeftWeapon} {
+		if inst := p.Equipment.Slots[slot]; inst != nil {
+			base += inst.Type.CritChance * inst.EffectivePower()
+		}
+	}
+	base *= 0.9
+	if base > 50 {
+		base = 50
+	}
+	return base
 }
 
 // EffectiveMaxStamina returns the stamina cap (no equipment modifiers yet).

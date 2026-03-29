@@ -70,6 +70,7 @@ type StatModifiers struct {
 	HPPct      float64 // % bonus to max HP
 	InvSlots   int     // extra inventory slots
 	InvWeight  float64 // extra carry weight in kg
+	CritChance float64 // flat % bonus to critical hit chance
 }
 
 // Equipment tracks the item instance equipped in each slot.

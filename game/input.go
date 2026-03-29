@@ -157,6 +157,10 @@ func (g *Game) resolveCombat(e *Enemy) {
 		g.player.EffectiveAttack(), g.player.WeaponPower(), g.player.WeaponSpeed(),
 		g.player.EffectiveAgility(), g.player.Level, e.Type.Defense, g.rng,
 	)
+	isCrit := g.rng.Float64()*100 < g.player.EffectiveCritChance()
+	if isCrit {
+		dmg = int(float64(dmg) * 2.0)
+	}
 	e.HP -= dmg
 	if e.HP < 0 {
 		e.HP = 0
@@ -165,19 +169,23 @@ func (g *Game) resolveCombat(e *Enemy) {
 	g.player.WearWeapons()
 	g.player.AddEXP(5)
 
+	hitLine := fmt.Sprintf("Hit %s for %d damage", e.Type.Name, dmg)
+	if isCrit {
+		hitLine = fmt.Sprintf("CRITICAL! Hit %s for %d damage", e.Type.Name, dmg)
+	}
 	if e.IsAlive() {
 		playerHpBefore := g.player.HP
 		g.player.TakeDamage(e.Type.Attack, g.rng)
 		playerDmg := playerHpBefore - g.player.HP
 		g.combatLines = []string{
-			fmt.Sprintf("Hit %s for %d damage", e.Type.Name, dmg),
+			hitLine,
 			fmt.Sprintf("%s  %d / %d HP", e.Type.Name, e.HP, e.Type.MaxHP),
 			fmt.Sprintf("%s hits you for %d damage", e.Type.Name, playerDmg),
 		}
 	} else {
 		g.player.AddEXP(20)
 		g.combatLines = []string{
-			fmt.Sprintf("Hit %s for %d damage", e.Type.Name, dmg),
+			hitLine,
 			fmt.Sprintf("%s defeated!", e.Type.Name),
 		}
 		dropChance := 10 + (g.player.Level - 1)

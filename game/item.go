@@ -29,10 +29,11 @@ type Item struct {
 	Image     *ebiten.Image // loaded at startup from ImagePath; nil until then
 	Effect    string
 	StatMods  StatModifiers
-	MaxStack  int                  // max items per inventory slot (0 or 1 = not stackable)
-	Power     int                  // weapon attack power, added to player.Attack only on hit
-	Speed     int                  // weapon attack speed (higher = faster)
-	OnUse     func(p *Player) bool // returns true if the item is consumed on use
+	MaxStack   int                  // max items per inventory slot (0 or 1 = not stackable)
+	Power      int                  // weapon attack power, added to player.Attack only on hit
+	Speed      int                  // weapon attack speed (higher = faster)
+	CritChance float64              // weapon-specific flat % bonus to critical hit chance
+	OnUse      func(p *Player) bool // returns true if the item is consumed on use
 
 	// Durability: MaxDurability 0 means indestructible (consumables, etc.)
 	// DurabilityLossRate is subtracted from Durability each time the item is used.

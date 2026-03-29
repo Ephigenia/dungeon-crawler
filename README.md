@@ -192,46 +192,38 @@ game/
 
 ## Ideas
 
-- [ ] general: non-grid movement, move by pixels and not grid positions
 - [ ] buffs: timed effects on items & player stats (weapons, armor, equipables, books, scrolls, oils)
 - [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
-- [ ] general: general game concept
-- [ ] graphics: high-resolution images
-- [ ] graphics: pixel perfect font rendering
 - [ ] debug: add debug menu/command line
-- [ ] enemies: sensor based follow (https://www.lexaloffle.com/bbs/?tid=48889)
 - [ ] enemies: attack types?
+- [ ] enemies: sensor based follow (https://www.lexaloffle.com/bbs/?tid=48889)
 - [ ] enemies: spawn positions
 - [ ] enemies: visualize difficulty?
 - [ ] enemies: wayfinding
+- [ ] fight: armor + armor penetration
 - [ ] fight: different attack modes?
 - [ ] fight: range?
-- [ ] fight: critical chance
-- [ ] fight: armor + armor penetration
-- [ ] fight: step-based fight concept
+- [ ] general: general game concept
+- [ ] general: non-grid movement, move by pixels and not grid positions
+- [ ] graphics: high-resolution images
+- [ ] graphics: pixel perfect font rendering
 - [ ] items: durability for weapons
 - [ ] items: modifier target: player, enemy
 - [ ] items: rarities (influencing the stats and positively increasing stats)
 - [ ] items: requirements for equipping items
 - [ ] map: 47 floor tileset
-- [ ] map: room & floor decorations, corners, shaped walls, traps, doors, secrets
-- [ ] map: secrets (walk next to secrets to discover)
 - [ ] map: generation algorithms
-- [ ] player: stats vs. attributes (attributes long term development, stats short term), core attribute vs. attribute
-- [ ] player: core attributes: strength, 
+- [ ] map: room & floor decorations, corners, shaped walls, traps, doors, secrets
 - [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps
-- [ ] QoC: object, items reference instance of spreadsheet (name, index)
 - [ ] QoC: abstraction for tilemaps
 - [ ] QoC: abstraction for tilemaps with animations
+- [ ] QoC: object, items reference instance of spreadsheet (name, index)
 - [ ] QoL: multiple items on the floor, "a" to get them all
 - [ ] QoL: multiple items on the floor, "p" opens interface to select which one to take, a (all)
-- [ ] tests: add tests for certain assumptions
-- [ ] tests: attack increases with level
-- [ ] tests: items cannot be equipped when stats not matching
-
 
 #### Done
 
+- [x] fight: critical chance
 - [x] debug: include "r" which re-creates level
 - [x] map: walkable and not walkable items, (shelf)
 - [x] map: destructable objects, not walkable but attackable, have health-points and spawn items on destruction

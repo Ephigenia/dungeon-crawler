@@ -28,73 +28,73 @@ var (
 	ItemIronSword = &Item{
 		ID: "iron_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/iron_sword.png",
-		Power: 3, Speed: 5,
+		Power: 3, Speed: 5, CritChance: 2,
 		MaxDurability: 80, DurabilityLossRate: 1.0,
 	}
 	Broadsword = &Item{
 		ID: "broadsword", Weight: 3.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/broadsword.png",
-		Power: 5, Speed: 3,
+		Power: 5, Speed: 3, CritChance: 1,
 		MaxDurability: 100, DurabilityLossRate: 0.8,
 	}
 	GoldenSword = &Item{
 		ID: "golden_sword", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/golden_sword.png",
-		Power: 7, Speed: 5,
+		Power: 7, Speed: 5, CritChance: 3,
 		MaxDurability: 90, DurabilityLossRate: 0.9,
 	}
 	SwordJeweled = &Item{
 		ID: "sword_jeweled", Weight: 2.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/sword_jeweled.png",
-		Effect: "DEF +1", Power: 8, Speed: 5, StatMods: StatModifiers{Defense: 1},
+		Effect: "DEF +1", Power: 8, Speed: 5, CritChance: 4, StatMods: StatModifiers{Defense: 1},
 		MaxDurability: 100, DurabilityLossRate: 0.7,
 	}
 	MegaSword = &Item{
 		ID: "mega_sword", Weight: 4.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/mega_sword.png",
-		Effect: "DEF +2", Power: 14, Speed: 2, StatMods: StatModifiers{Defense: 2},
+		Effect: "DEF +2", Power: 14, Speed: 2, CritChance: 0.5, StatMods: StatModifiers{Defense: 2},
 		MaxDurability: 120, DurabilityLossRate: 0.6,
 	}
 	Saber = &Item{
 		ID: "saber", Weight: 1.8, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/saber.png",
-		Power: 4, Speed: 7,
+		Power: 4, Speed: 7, CritChance: 5,
 		MaxDurability: 70, DurabilityLossRate: 1.2,
 	}
 	Rapier1 = &Item{
 		ID: "rapier", Weight: 1.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier1.png",
-		Power: 3, Speed: 9,
+		Power: 3, Speed: 9, CritChance: 6,
 		MaxDurability: 60, DurabilityLossRate: 1.5,
 	}
 	Rapier2 = &Item{
 		ID: "rapier", Weight: 1.5, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/rapier2.png",
-		Power: 6, Speed: 9,
+		Power: 6, Speed: 9, CritChance: 8,
 		MaxDurability: 60, DurabilityLossRate: 1.5,
 	}
 	Axe = &Item{
 		ID: "axe", Weight: 1.0, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/axe.png",
-		Power: 5, Speed: 4,
+		Power: 5, Speed: 4, CritChance: 1.5,
 		MaxDurability: 80, DurabilityLossRate: 1.0,
 	}
 	Hatchet = &Item{
 		ID: "hatchet", Weight: 1.1, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/hatchet.png",
-		Power: 4, Speed: 7,
+		Power: 4, Speed: 7, CritChance: 4,
 		MaxDurability: 80, DurabilityLossRate: 1.0,
 	}
 	KnightsAxe = &Item{
 		ID: "knights_axe", Weight: 1.6, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/knights_axe.png",
-		Power: 9, Speed: 3,
+		Power: 9, Speed: 3, CritChance: 2,
 		MaxDurability: 100, DurabilityLossRate: 0.8,
 	}
 	ExecutionersAxe = &Item{
 		ID: "executioners_axe", Weight: 2.2, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotRightWeapon},
 		Color: color.RGBA{180, 185, 198, 255}, ImagePath: "assets/items/weapons/executioners_axe.png",
-		Power: 12, Speed: 2,
+		Power: 12, Speed: 2, CritChance: 0.5,
 		MaxDurability: 120, DurabilityLossRate: 0.5,
 	}
 
@@ -260,7 +260,7 @@ var (
 	ItemNecklaceTooth = &Item{
 		ID: "tooth_necklace", Weight: 0.2, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotNecklace},
 		Color: color.RGBA{218, 188, 48, 255}, ImagePath: "assets/items/accessories/necklace_tooth.png",
-		Effect: "+5 HP", StatMods: StatModifiers{HP: 5},
+		Effect: "+5 HP, +3% CRIT", StatMods: StatModifiers{HP: 5, CritChance: 3},
 		MaxDurability: 200, DurabilityLossRate: 0.1,
 	}
 
@@ -268,7 +268,7 @@ var (
 	ItemGoldRing = &Item{
 		ID: "gold_ring", Weight: 0.1, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotLeftRing, SlotRightRing},
 		Color: color.RGBA{220, 195, 55, 255}, ImagePath: "assets/items/accessories/ring_gold.png",
-		Effect: "+2 ATK", StatMods: StatModifiers{Attack: 2},
+		Effect: "+2 ATK, +2% CRIT", StatMods: StatModifiers{Attack: 2, CritChance: 2},
 		MaxDurability: 200, DurabilityLossRate: 0.05,
 	}
 	ItemSilverRing = &Item{
@@ -280,7 +280,7 @@ var (
 	ItemDiamondRing = &Item{
 		ID: "diamond_ring", Weight: 0.1, Category: CategoryEquipment, Slots: []EquipmentSlot{SlotLeftRing, SlotRightRing},
 		Color: color.RGBA{220, 195, 55, 255}, ImagePath: "assets/items/accessories/ring_diamond.png",
-		Effect: "+3 ATK", StatMods: StatModifiers{Attack: 3},
+		Effect: "+3 ATK, +3% CRIT", StatMods: StatModifiers{Attack: 3, CritChance: 3},
 		MaxDurability: 200, DurabilityLossRate: 0.05,
 	}
 	ItemDiamondRing2 = &Item{

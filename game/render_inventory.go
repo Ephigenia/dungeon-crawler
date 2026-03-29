@@ -221,7 +221,7 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 		g.hudFont, x, dy, dim)
 	dy += 14
 
-	if selectedItem.Power > 0 || selectedItem.Speed > 0 {
+	if selectedItem.Power > 0 || selectedItem.Speed > 0 || selectedItem.CritChance > 0 {
 		weaponStr := ""
 		if selectedItem.Power > 0 {
 			weaponStr += fmt.Sprintf("Power: +%d", selectedItem.Power)
@@ -231,6 +231,12 @@ func (g *Game) drawInventoryDetail(screen *ebiten.Image, inv *Inventory, x, pane
 				weaponStr += "   "
 			}
 			weaponStr += fmt.Sprintf("Speed: %d", selectedItem.Speed)
+		}
+		if selectedItem.CritChance > 0 {
+			if weaponStr != "" {
+				weaponStr += "   "
+			}
+			weaponStr += fmt.Sprintf("Crit: +%.1f%%", selectedItem.CritChance)
 		}
 		text.Draw(screen, weaponStr, g.hudFont, x, dy, green)
 		dy += 14
