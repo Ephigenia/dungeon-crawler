@@ -94,6 +94,28 @@ func (item *Item) FitsSlot(s EquipmentSlot) bool {
 	return false
 }
 
+// newTimedBuff builds a consumable that applies a temporary attack bonus for durationFrames.
+func newTimedBuff(id string, weight float64, durationFrames int, attackPct float64, col color.RGBA, imagePath string) *Item {
+	seconds := durationFrames / 60
+	return &Item{
+		ID:        id,
+		Weight:    weight,
+		Category:  CategoryConsumable,
+		Color:     col,
+		ImagePath: imagePath,
+		Effect:    fmt.Sprintf("+%.0f%% ATK %ds", attackPct, seconds),
+		MaxStack:  3,
+		OnUse: func(p *Player) bool {
+			p.ActiveBuffs = append(p.ActiveBuffs, ActiveBuff{
+				Name:       id,
+				AttackPct:  attackPct,
+				FramesLeft: durationFrames,
+			})
+			return true
+		},
+	}
+}
+
 // newConsumable builds a healing consumable item.
 func newConsumable(id string, weight float64, heal int, col color.RGBA, imagePath string) *Item {
 	effect := fmt.Sprintf("Restores %d HP", heal)

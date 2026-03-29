@@ -210,6 +210,14 @@ func (g *Game) drawHUD(screen *ebiten.Image) {
 	text.Draw(screen, fmt.Sprintf("INV: %d / %d items  %.2f / %.2f kg",
 		len(inv.Items), inv.MaxItems, inv.CurrentWeight(), inv.MaxWeight),
 		g.hudFont, 4, hudY, dim)
+	hudY += 12
+
+	buffColor := color.RGBA{230, 210, 80, 255}
+	for _, b := range g.player.ActiveBuffs {
+		secs := (b.FramesLeft + 59) / 60
+		text.Draw(screen, fmt.Sprintf("+%.0f%% ATK  %ds", b.AttackPct, secs), g.hudFont, 4, hudY, buffColor)
+		hudY += 12
+	}
 }
 
 // drawCombatNotification renders the combat result box at the bottom of the screen for combatFrames.

@@ -14,6 +14,7 @@ func (g *Game) Update() error {
 	}
 	g.particles.Update()
 	g.player.tickStaminaRegen()
+	g.player.tickBuffs()
 	g.updateEnemies()
 	for _, o := range g.objects {
 		if o.State == ObjectStateOpening {

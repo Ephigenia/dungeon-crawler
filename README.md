@@ -192,7 +192,6 @@ game/
 
 ## Ideas
 
-- [ ] buffs: timed effects on items & player stats (weapons, armor, equipables, books, scrolls, oils)
 - [ ] bug: when l.hand/r.hand item is used another item which matches the slot both items are highlighted as if they are used
 - [ ] debug: add debug menu/command line
 - [ ] enemies: attack types?

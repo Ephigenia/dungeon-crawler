@@ -16,6 +16,13 @@ const (
 	staminaCostAction    = 2
 )
 
+// ActiveBuff is a temporary stat modifier applied for a fixed number of frames.
+type ActiveBuff struct {
+	Name       string
+	AttackPct  float64 // additive % bonus to attack (e.g. 50 = +50%)
+	FramesLeft int
+}
+
 // Player holds the player's state and stats.
 // Base stats (BaseAttack, BaseDefense, BaseAgility, BaseMaxHP) grow on level-up
 // and are never mutated by equipment. Effective stats are derived at call time
@@ -34,6 +41,7 @@ type Player struct {
 	NextLevelEXP     int
 	Inventory        *Inventory
 	Equipment        *Equipment
+	ActiveBuffs      []ActiveBuff
 	staminaRegenTick int
 }
 
@@ -88,10 +96,18 @@ func (p *Player) EffectiveMaxHP() int {
 	return applyPct(p.BaseMaxHP+mods.HP, mods.HPPct)
 }
 
-// EffectiveAttack returns the attack stat including all equipment bonuses.
+// EffectiveAttack returns the attack stat including equipment and active buff bonuses.
 func (p *Player) EffectiveAttack() int {
 	mods := p.equipmentStatMods()
-	return applyPct(p.BaseAttack+mods.Attack, mods.AttackPct)
+	base := applyPct(p.BaseAttack+mods.Attack, mods.AttackPct)
+	var buffPct float64
+	for _, b := range p.ActiveBuffs {
+		buffPct += b.AttackPct
+	}
+	if buffPct != 0 {
+		base = applyPct(base, buffPct)
+	}
+	return base
 }
 
 // EffectiveDefense returns the defense stat including all equipment bonuses.
@@ -152,6 +168,18 @@ func (p *Player) staminaRegenRate() int {
 		interval = 5
 	}
 	return interval
+}
+
+// tickBuffs advances all active buff timers and removes expired ones.
+func (p *Player) tickBuffs() {
+	alive := p.ActiveBuffs[:0]
+	for i := range p.ActiveBuffs {
+		p.ActiveBuffs[i].FramesLeft--
+		if p.ActiveBuffs[i].FramesLeft > 0 {
+			alive = append(alive, p.ActiveBuffs[i])
+		}
+	}
+	p.ActiveBuffs = alive
 }
 
 // tickStaminaRegen advances the passive regen timer and restores 1 stamina when it fires.

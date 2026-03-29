@@ -15,6 +15,9 @@ var (
 	ItemMediumHealthPotion = newConsumable("medium_health_potion", 0.5, 10, color.RGBA{210, 80, 80, 255}, "assets/items/health_potion_medium.png")
 	ItemLargeHealthPotion  = newConsumable("large_health_potion", 0.8, 20, color.RGBA{180, 30, 30, 255}, "assets/items/health_potion_large.png")
 
+	// Buff potions
+	ItemStrengthPotion = newTimedBuff("strength_potion", 0.3, 30*60, 50, color.RGBA{230, 210, 80, 255}, "assets/items/potion_small_yellow.png")
+
 	// Food
 	ItemBreadRoll  = newConsumable("bread_roll", 0.1, 2, color.RGBA{210, 175, 125, 255}, "assets/items/food/bread_roll.png")
 	ItemGrapes     = newConsumable("grapes", 0.1, 3, color.RGBA{158, 100, 58, 255}, "assets/items/food/grapes.png")
@@ -313,6 +316,7 @@ var (
 	// AllItems lists every item so loadItemImages can find them all.
 	AllItems = []*Item{
 		ItemSmallHealthPotion, ItemMediumHealthPotion, ItemLargeHealthPotion,
+		ItemStrengthPotion,
 		ItemBreadRoll, ItemGrapes, ItemFriedEgg, ItemMeat, ItemApple, ItemMushroom, ItemPizzaSlice,
 		ItemIronSword, Broadsword, GoldenSword, SwordJeweled, MegaSword,
 		Saber, Rapier1, Rapier2, Axe, Hatchet, KnightsAxe, ExecutionersAxe,
@@ -370,6 +374,7 @@ var (
 		ItemSimpleShoes,
 		ItemSmallBackpack,
 		ItemSmallHealthPotion,
+		ItemStrengthPotion,
 		ItemWoodenShield,
 	}
 )
