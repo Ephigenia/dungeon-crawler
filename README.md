@@ -217,7 +217,6 @@ game/
 - [ ] map: room & floor decorations, corners, shaped walls, traps, doors, secrets
 - [ ] map: secrets (walk next to secrets to discover)
 - [ ] map: generation algorithms
-- [ ] map: item spawn probabilties
 - [ ] player: stats vs. attributes (attributes long term development, stats short term), core attribute vs. attribute
 - [ ] player: core attributes: strength, 
 - [ ] QoC: abstraction for image loading, assets, spritemaps, tilemaps

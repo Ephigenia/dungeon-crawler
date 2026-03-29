@@ -21,19 +21,19 @@ const (
 // and are never mutated by equipment. Effective stats are derived at call time
 // via EffectiveXxx() methods, which add the sum of all equipped-item bonuses.
 type Player struct {
-	X, Y            int
-	HP              int
-	BaseMaxHP       int
-	BaseAttack      int
-	BaseDefense     int
-	BaseAgility     int
-	BaseMaxStamina  int
-	Stamina         int
-	Level           int
-	EXP             int
-	NextLevelEXP    int
-	Inventory       *Inventory
-	Equipment       *Equipment
+	X, Y             int
+	HP               int
+	BaseMaxHP        int
+	BaseAttack       int
+	BaseDefense      int
+	BaseAgility      int
+	BaseMaxStamina   int
+	Stamina          int
+	Level            int
+	EXP              int
+	NextLevelEXP     int
+	Inventory        *Inventory
+	Equipment        *Equipment
 	staminaRegenTick int
 }
 
@@ -245,7 +245,7 @@ func (p *Player) reduceItemDurability(inst *ItemInstance) {
 	if inst == nil || inst.Type.MaxDurability == 0 {
 		return
 	}
-	loss := inst.Type.DurabilityLossRate * p.durabilityLossFactor()
+	loss := inst.Type.DurabilityLossRate * p.durabilityLossFactor() * 0.375
 	inst.Durability -= loss
 	if inst.Durability < 0 {
 		inst.Durability = 0

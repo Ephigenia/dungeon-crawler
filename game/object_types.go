@@ -68,6 +68,8 @@ var (
 	ObjectTypeShelf = &ObjectType{
 		Name:                 "Shelf",
 		Openable:             true,
+		Destructable:         true,
+		MaxHP:                15,
 		FallbackColor:        color.RGBA{160, 130, 90, 255},
 		SpritesheetPath:      "assets/map/map_objects.png",
 		SpritesheetIndex:     1,
