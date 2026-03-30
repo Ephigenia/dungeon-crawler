@@ -98,7 +98,7 @@ var (
 	ObjectTypeTable = &ObjectType{
 		Name:                  "Table",
 		MaxHP:                 90,
-		ImagePath:             "assets/map/table.png",
+		ImagePath:             "assets/map/table1.png",
 		DestroyedImagePath:    "assets/map/debris1.png",
 		WalkableWhenDestroyed: true,
 	}
@@ -113,7 +113,7 @@ var (
 		Name:             "Bones",
 		PassableByPlayer: true,
 		PassableByEnemy:  true,
-		ImagePath:        "assets/map/bones.png",
+		ImagePath:        "assets/map/bones1.png",
 	}
 	ObjectTypeBones2 = &ObjectType{
 		Name:             "Bones",

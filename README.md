@@ -201,9 +201,7 @@ game/
 - [ ] fight: armor + armor penetration
 - [ ] fight: different attack modes?
 - [ ] fight: range?
-- [ ] general: general game concept
-- [ ] general: non-grid movement, move by pixels and not grid positions
-- [ ] graphics: high-resolution images
+- [ ] general: non-grid movement, move by pixels and not grid positions?
 - [ ] graphics: pixel perfect font rendering
 - [ ] items: modifier target: player, enemy
 - [ ] items: rarities (influencing the stats and positively increasing stats)
@@ -212,3 +210,4 @@ game/
 - [ ] map: generation algorithms
 - [ ] map: room & floor decorations, corners, shaped walls, traps, doors, secrets
 - [ ] QoC: object, items reference instance of spreadsheet (name, index)
+- [ ] QoC: image abstraction, animations, directions (up, down)
