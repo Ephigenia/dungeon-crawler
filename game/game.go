@@ -10,10 +10,11 @@ import (
 )
 
 const (
-	TileSize   = 16
-	ScreenW    = 640
-	ScreenH    = 480
-	PlayerSize = 14
+	TileSize      = 16
+	EnemyTileSize = 32
+	ScreenW       = 640
+	ScreenH       = 480
+	PlayerSize    = 14
 
 	repeatDelayFrames    = 8 // ~133ms before repeat starts
 	repeatIntervalFrames = 3 // move every 3 frames when holding

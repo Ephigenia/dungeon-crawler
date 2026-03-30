@@ -33,22 +33,21 @@ func loadItemImages(assets fs.FS) {
 	}
 }
 
-// loadEnemyImages loads sprites for all enemy types from the embedded FS.
+// loadEnemyImages loads spritesheets for all enemy types.
+// Frame size is auto-detected from each image's height (square frames).
 func loadEnemyImages(assets fs.FS) {
 	for _, et := range AllEnemyTypes {
-		et.Image = loadImageFile(assets, et.ImagePath)
+		et.IdleSheet = LoadSpritesheetAutoFrame(assets, et.IdleImagePath)
+		et.MoveSheet = LoadSpritesheetAutoFrame(assets, et.MoveImagePath)
+		et.AttackSheet = LoadSpritesheetAutoFrame(assets, et.AttackImagePath)
+		et.DeathSheet = LoadSpritesheetAutoFrame(assets, et.DeathImagePath)
 	}
-}
-
-// allObjectTypes returns AllObjectTypes plus any types not in the spawnable pool.
-func allObjectTypes() []*ObjectType {
-	return append(AllObjectTypes, ObjectTypeShelf)
 }
 
 // loadObjectImages loads standalone sprites for all object types from the embedded FS.
 // Types that use the shared spritesheet (UsesSpritesheet == true) are skipped.
 func loadObjectImages(assets fs.FS) {
-	for _, ot := range allObjectTypes() {
+	for _, ot := range AllObjectTypes {
 		if ot.UsesSpritesheet {
 			continue
 		}
@@ -64,12 +63,10 @@ func loadObjectImages(assets fs.FS) {
 					return image.Rect(x, y, x+TileSize, y+TileSize)
 				}
 				ot.Image = sheet.SubImage(spriteRect(ot.SpritesheetIndex)).(*ebiten.Image)
-				if ot.HasDestroyedSprite {
-					ot.DestroyedImage = sheet.SubImage(spriteRect(ot.DestroyedSpritesheetIndex)).(*ebiten.Image)
-				}
 			}
 			continue
 		}
 		ot.Image = loadImageFile(assets, ot.ImagePath)
+		ot.DestroyedImage = loadImageFile(assets, ot.DestroyedImagePath)
 	}
 }

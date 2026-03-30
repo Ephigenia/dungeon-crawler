@@ -2,23 +2,57 @@ package game
 
 import "fmt"
 
-// updateEnemies ticks AI for every living enemy once per call.
+// updateEnemies ticks AI and animation for every enemy once per call.
 func (g *Game) updateEnemies() {
 	for _, e := range g.enemies {
 		if !e.IsAlive() {
+			// Transition to dead state on first tick after death.
+			if e.state != enemyStateDead {
+				e.state = enemyStateDead
+				e.animFrame = 0
+				e.animTick = 0
+			}
+			// Advance death animation until the last frame, then hold.
+			if e.Type.AnimSpeed > 0 {
+				sheet := e.Type.SheetForState(enemyStateDead)
+				if sheet.Len() > 0 && e.animFrame < sheet.Len()-1 {
+					e.animTick++
+					if e.animTick >= e.Type.AnimSpeed {
+						e.animTick = 0
+						e.animFrame++
+					}
+				}
+			}
 			continue
 		}
+
+		// Advance animation.
+		if e.Type.AnimSpeed > 0 {
+			if sheet := e.Type.SheetForState(e.state); sheet.Len() > 1 {
+				e.animTick++
+				if e.animTick >= e.Type.AnimSpeed {
+					e.animTick = 0
+					e.animFrame = (e.animFrame + 1) % sheet.Len()
+				}
+			}
+		}
+
 		e.moveTick--
 		if e.moveTick > 0 {
 			continue
 		}
 		e.moveTick = e.Type.MoveInterval
 
+		prevState := e.state
 		dist := iabs(g.player.X-e.X) + iabs(g.player.Y-e.Y)
 		if dist <= e.Type.VisionRange {
 			e.state = enemyStateChase
 		} else {
 			e.state = enemyStateIdle
+		}
+		if e.state != prevState {
+			e.animFrame = 0
+			e.animTick = 0
 		}
 
 		switch e.state {

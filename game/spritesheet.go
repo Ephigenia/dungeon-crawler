@@ -20,6 +20,24 @@ type Spritesheet struct {
 	cols    int
 }
 
+// LoadSpritesheetAutoFrame loads an image and treats frames as square cells
+// sized to the image height (frameSize = image.Height). Works for any strip
+// where frames are square regardless of how many there are.
+// Returns nil if the image cannot be loaded.
+func LoadSpritesheetAutoFrame(assets fs.FS, path string) *Spritesheet {
+	img := loadImageFile(assets, path)
+	if img == nil {
+		return nil
+	}
+	h := img.Bounds().Dy()
+	return &Spritesheet{
+		img:     img,
+		spriteW: h,
+		spriteH: h,
+		cols:    img.Bounds().Dx() / h,
+	}
+}
+
 // LoadSpritesheet loads an image from assets and returns a Spritesheet
 // that slices it into sprites of spriteW×spriteH pixels.
 // Returns nil if the image cannot be loaded.
@@ -34,6 +52,15 @@ func LoadSpritesheet(assets fs.FS, path string, spriteW, spriteH int) *Spriteshe
 		spriteH: spriteH,
 		cols:    img.Bounds().Dx() / spriteW,
 	}
+}
+
+// Len returns the total number of frames in the spritesheet.
+// Returns 0 if the sheet is nil.
+func (s *Spritesheet) Len() int {
+	if s == nil {
+		return 0
+	}
+	return s.cols * (s.img.Bounds().Dy() / s.spriteH)
 }
 
 // Sprite returns a new image containing the sprite at the given zero-based index.

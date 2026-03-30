@@ -132,28 +132,28 @@ func (g *Game) drawWorld(screen *ebiten.Image) {
 			op.GeoM.Translate(ox, oy)
 			screen.DrawImage(o.Type.Image, &op)
 		default:
-			vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, o.Type.FallbackColor, false)
+			fallbackColor := color.RGBA{160, 130, 90, 255}
+			vector.DrawFilledRect(screen, float32(ox)+1, float32(oy)+1, TileSize-2, TileSize-2, fallbackColor, false)
 		}
 	}
 
 	for _, e := range g.enemies {
-		if !e.IsAlive() {
-			continue
-		}
 		ex := float64(e.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2
 		ey := float64(e.Y*TileSize) + offsetY + float64(TileSize-PlayerSize)/2
 		eImg := g.enemyImg
-		if e.Type.Image != nil {
-			eImg = e.Type.Image
+		if img := e.Type.FrameForState(e.state, e.animFrame); img != nil {
+			eImg = img
 		}
 		iw, ih := eImg.Bounds().Dx(), eImg.Bounds().Dy()
 		op.GeoM.Reset()
 		op.GeoM.Scale(float64(PlayerSize)/float64(iw), float64(PlayerSize)/float64(ih))
 		op.GeoM.Translate(ex, ey)
 		screen.DrawImage(eImg, &op)
-		drawStatBar(screen, float32(ex), float32(ey)+PlayerSize+1, PlayerSize, e.HP, e.Type.MaxHP,
-			color.RGBA{30, 30, 30, 200}, color.RGBA{224, 108, 117, 255})
-		vector.DrawFilledRect(screen, float32(ex)+PlayerSize-3, float32(ey), 3, 3, dangerColor(calcEnemyDangerLevel(e, g.player)), false)
+		if e.IsAlive() {
+			drawStatBar(screen, float32(ex), float32(ey)+PlayerSize+1, PlayerSize, e.HP, e.Type.MaxHP,
+				color.RGBA{30, 30, 30, 200}, color.RGBA{224, 108, 117, 255})
+			vector.DrawFilledRect(screen, float32(ex)+PlayerSize-3, float32(ey), 3, 3, dangerColor(calcEnemyDangerLevel(e, g.player)), false)
+		}
 	}
 
 	playerPx := float64(g.player.X*TileSize) + offsetX + float64(TileSize-PlayerSize)/2

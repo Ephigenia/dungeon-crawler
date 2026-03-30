@@ -10,15 +10,63 @@ import (
 // EnemyType is the static definition of an enemy kind — its name and base stats.
 // Instances on the map are represented by Enemy, which holds a pointer to its type
 // plus mutable runtime state (current HP, position).
+//
+// Each state can have its own spritesheet; frame 0 is displayed. Unset paths are
+// ignored and the renderer falls back to the first available image.
 type EnemyType struct {
 	Name         string
 	MaxHP        int
 	Attack       int
 	Defense      int
-	MoveInterval int           // frames between moves; lower = faster
-	VisionRange  int           // Manhattan distance at which the enemy starts chasing
-	ImagePath    string        // asset path for the sprite; empty = use color fallback
-	Image        *ebiten.Image // loaded at startup from ImagePath; nil until then
+	MoveInterval int // frames between moves; lower = faster
+	VisionRange  int // Manhattan distance at which the enemy starts chasing
+	AnimSpeed    int // ticks per animation frame; 0 = no animation (always show frame 0)
+
+	IdleImagePath   string
+	MoveImagePath   string
+	AttackImagePath string
+	DeathImagePath  string
+
+	IdleSheet   *Spritesheet // spritesheet for idle state
+	MoveSheet   *Spritesheet // spritesheet for move/chase state
+	AttackSheet *Spritesheet // spritesheet for attack state
+	DeathSheet  *Spritesheet // spritesheet for death state
+}
+
+// SheetForState returns the best available spritesheet for the given state,
+// falling back through idle → move → attack → death until one is found.
+func (et *EnemyType) SheetForState(state enemyState) *Spritesheet {
+	switch state {
+	case enemyStateDead:
+		if et.DeathSheet != nil {
+			return et.DeathSheet
+		}
+	case enemyStateChase:
+		if et.MoveSheet != nil {
+			return et.MoveSheet
+		}
+	}
+	if et.IdleSheet != nil {
+		return et.IdleSheet
+	}
+	if et.MoveSheet != nil {
+		return et.MoveSheet
+	}
+	if et.AttackSheet != nil {
+		return et.AttackSheet
+	}
+	return et.DeathSheet
+}
+
+// FrameForState returns the sprite at the given frame index from the best available
+// spritesheet for the given state. The frame index is wrapped to the sheet length.
+// Returns nil if no spritesheet is loaded for this type.
+func (et *EnemyType) FrameForState(state enemyState, frame int) *ebiten.Image {
+	sheet := et.SheetForState(state)
+	if sheet.Len() == 0 {
+		return nil
+	}
+	return sheet.Sprite(frame % sheet.Len())
 }
 
 type enemyState int
@@ -26,16 +74,19 @@ type enemyState int
 const (
 	enemyStateIdle  enemyState = iota
 	enemyStateChase
+	enemyStateDead
 )
 
 
 // Enemy is a live enemy on the map.
 type Enemy struct {
-	X, Y     int
-	HP       int
-	Type     *EnemyType
-	state    enemyState
-	moveTick int
+	X, Y      int
+	HP        int
+	Type      *EnemyType
+	state     enemyState
+	moveTick  int
+	animFrame int // current animation frame index
+	animTick  int // ticks elapsed since last frame advance
 }
 
 // IsAlive returns true if the enemy has HP remaining.

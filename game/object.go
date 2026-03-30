@@ -1,7 +1,6 @@
 package game
 
 import (
-	"image/color"
 	"math/rand"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -11,16 +10,17 @@ import (
 // Instances on the map are represented by Object, which holds a pointer to its type
 // plus mutable runtime state (position, open/close state).
 type ObjectType struct {
-	Name             string
-	Openable         bool // player can open with O key
-	PassableByPlayer    bool // player can walk onto this tile
-	PassableByEnemy     bool // enemies can walk onto this tile
+	Name                  string
+	Openable              bool // player can open with O key
+	PassableByPlayer      bool // player can walk onto this tile
+	PassableByEnemy       bool // enemies can walk onto this tile
 	WalkableWhenDestroyed bool // players and enemies can walk onto this tile after destruction
-	FallbackColor    color.RGBA // drawn when no image is available
 
 	// Standalone image (loaded from ImagePath at startup).
-	ImagePath string
-	Image     *ebiten.Image
+	ImagePath          string
+	Image              *ebiten.Image
+	DestroyedImagePath string
+	DestroyedImage     *ebiten.Image
 
 	// Spritesheet-based animation (shared animated_chests.png).
 	// When UsesSpritesheet is true the object is rendered by slicing a 16×16
@@ -43,12 +43,6 @@ type ObjectType struct {
 	// The player destroys them by bumping into them.
 	Destructable bool
 	MaxHP        int
-
-	// DestroyedSpritesheetIndex, when HasDestroyedSprite is true, selects the
-	// column in SpritesheetPath to use when the object is destroyed.
-	HasDestroyedSprite      bool
-	DestroyedSpritesheetIndex int
-	DestroyedImage          *ebiten.Image
 }
 
 // ObjectState drives which animation frame / spritesheet column is shown.

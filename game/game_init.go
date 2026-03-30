@@ -30,7 +30,7 @@ func New(assets fs.FS) *Game {
 		log.Fatalf("parse font: %v", err)
 	}
 	g.hudFont, err = opentype.NewFace(tt, &opentype.FaceOptions{
-		Size:    12,
+		Size:    11,
 		DPI:     72,
 		Hinting: font.HintingNone,
 	})
@@ -110,14 +110,7 @@ func (g *Game) resetEntities(d *dungeon.Dungeon) {
 		}
 	}
 
-	// Spawn shelves against walls, one attempt per room, never blocking exits.
-	for _, room := range d.Rooms {
-		candidates := shelfCandidates(d, room)
-		if len(candidates) > 0 {
-			pos := candidates[g.rng.Intn(len(candidates))]
-			g.objects = append(g.objects, &Object{X: pos[0], Y: pos[1], Type: ObjectTypeShelf, HP: ObjectTypeShelf.MaxHP})
-		}
-	}
+
 
 	g.potions = g.potions[:0]
 	for _, room := range d.Rooms {
